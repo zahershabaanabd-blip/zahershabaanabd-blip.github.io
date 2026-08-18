@@ -636,7 +636,9 @@ section{animation:fade .25s ease}
     </div>
   </div>
   <div class="card">
-    <p class="note">سجل حساباتي — إصدار 10.4<br>يعمل بدون إنترنت، والبيانات محفوظة داخل جهازك.<br>يُنصح بحفظ نسخة احتياطية شهرياً.</p>
+    <div class="kv"><span>إصدار التطبيق</span><b id="vinfo" class="num">—</b></div>
+    <button class="btn s" onclick="forceUpdate()">تحديث التطبيق لآخر إصدار</button>
+    <p class="note">سجل حساباتي — إصدار 10.5<br>يعمل بدون إنترنت، والبيانات محفوظة داخل جهازك.<br>يُنصح بحفظ نسخة احتياطية شهرياً.</p>
     <button class="btn s" onclick="go('trash')">سلة المحذوفات</button>
     <button class="btn s" onclick="go('home')">الرجوع للرئيسية</button>
   </div>
@@ -1232,7 +1234,7 @@ let DB=JSON.parse(localStorage.getItem("bg_recs")||"[]");
 let CFG=JSON.parse(localStorage.getItem("bg_cfg")||"{}");
 if(PRESET_URL&&!CFG.url){CFG.url=PRESET_URL;localStorage.setItem("bg_cfg",JSON.stringify(CFG));}
 let kind="in",img=null,cat="",sub="",filt="all",rptYear="all",lsort="d";
-const APPVER="10.4";
+const APPVER="10.5";
 const $=id=>document.getElementById(id);
 const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function bytesUsed(){let n=0;try{for(const k in localStorage)if(localStorage.hasOwnProperty(k))n+=(localStorage[k]||"").length;}catch(e){}return n;}
@@ -1569,7 +1571,7 @@ function go(s,isBack){
   if(s==="exp"){bkChk();$("cnt").textContent=DB.length;
     const u=bytesUsed(),pc=Math.min(100,Math.round(u/(5*1024*1024)*100));
     $("usg").innerHTML=`<span style="color:${pc>80?"var(--out)":pc>60?"#9A7B10":"var(--in)"}">${(u/1048576).toFixed(2)} م.ب · ${pc}%</span>`;$("pend").textContent=pendCount();$("sst").textContent=CFG.url?"مفعّلة":"غير مفعّلة";}
-  if(s==="set"){$("s_url").value=CFG.url||"";$("s_name").value=CFG.name||"";$("s_key").value=CFG.key||"";showSet();applyFS();pinInfo();}
+  if(s==="set"){$("s_url").value=CFG.url||"";$("s_name").value=CFG.name||"";$("s_key").value=CFG.key||"";showSet();applyFS();pinInfo();{const v=$("vinfo");if(v)v.textContent=APPVER;}}
   window.scrollTo(0,0);
 }
 let catManual=false;
@@ -2545,6 +2547,17 @@ function lkShow(mode,title,sub){LK.mode=mode;LK.buf="";lkDots();
 }
 function pinSetup(){lkShow("new","رقم الدخول البديل","أربعة أرقام تُستخدم عند تعذّر البصمة");}
 function pinRemove(){lkShow("verify","أدخل رقم الدخول الحالي","للتأكيد قبل إلغاء القفل");}
+async function forceUpdate(){
+  toast("جارٍ التحديث…");
+  try{
+    const regs=await navigator.serviceWorker.getRegistrations();
+    for(const r of regs){try{await r.update();}catch(_){}}
+    const keys=await caches.keys();
+    for(const k of keys)await caches.delete(k);
+    for(const r of regs){try{await r.unregister();}catch(_){}}
+  }catch(e){}
+  setTimeout(()=>{location.replace(location.pathname+"?u="+Date.now());},400);
+}
 function pinInfo(){const c=pinCfg();
   if($("pinst"))$("pinst").textContent=c?(c.bio?"مفعَّل — بالبصمة ورقم احتياطي":"مفعَّل — بالرقم فقط (البصمة غير مفعَّلة)"):"غير مفعَّل";
   if($("pinbtn"))$("pinbtn").textContent=c?"تغيير الرقم الاحتياطي":"تفعيل القفل";
@@ -2602,7 +2615,19 @@ $("recsheet").addEventListener("click",e=>{if(e.target.id==="recsheet")closeRec(
 syncBar();renderHome();if(CFG.url)syncNow(false);
 try{const last=localStorage.getItem("bg_scr"); if(last&&last!=="home"&&$(last))go(last);}catch(e){}
 try{const a=new URLSearchParams(location.search).get("a");if(["in","co","out"].includes(a))openForm(a);}catch(e){}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    reg.addEventListener('updatefound',()=>{
+      const w=reg.installing; if(!w)return;
+      w.addEventListener('statechange',()=>{
+        if(w.state==='installed'&&navigator.serviceWorker.controller){
+          toast("فيه إصدار أحدث — افتح الإعدادات واضغط «تحديث التطبيق»");
+        }
+      });
+    });
+    setInterval(()=>{try{reg.update();}catch(e){}},3600000);
+  }).catch(()=>{});
+}
 
 </script>
 </body>
