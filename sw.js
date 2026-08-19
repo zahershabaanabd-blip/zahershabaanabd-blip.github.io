@@ -1,11 +1,17 @@
-const C='bg-accounts-v63';
+const C='bg-accounts-v73';
 const ASSETS=['./manifest.json','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html'].concat(ASSETS))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 self.addEventListener('message',e=>{if(e.data==='skipWaiting')self.skipWaiting();});
 self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
-  if(u.origin!==location.origin)return;
+  if(u.origin!==location.origin){
+    /* الخطوط: تخزين دائم بعد أول تحميل — شغل أوفلاين كامل */
+    if(u.hostname==='fonts.googleapis.com'||u.hostname==='fonts.gstatic.com'){
+      e.respondWith(caches.open('bg-fonts').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(rs=>{if(rs&&(rs.ok||rs.type==='opaque'))c.put(e.request,rs.clone());return rs;}))));
+    }
+    return;
+  }
   const isPage=e.request.mode==='navigate'||u.pathname.endsWith('/index.html')||u.pathname==='/'||u.pathname.endsWith('/');
   if(isPage){
     // الصفحة: الشبكة أولاً مع تجاوز كاش المتصفح تماماً
