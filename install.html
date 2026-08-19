@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E2438">
 <title>تثبيت سجل حساباتي</title>
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;padding:26px 18px 40px;font-family:"Segoe UI",Tahoma,system-ui,sans-serif;
@@ -41,6 +43,8 @@ b{color:#0E2438}
     <p>تسجيل المقبوضات والمصروفات لحظياً</p>
   </div>
 
+  <button id="ibtn" class="btn" style="display:none;width:100%;border:0;font-family:inherit;cursor:pointer">
+    ⬇ تثبيت التطبيق على جهازك</button>
   <a class="btn" href="index.html">افتح التطبيق</a>
 
   <div class="card">
@@ -76,5 +80,19 @@ b{color:#0E2438}
 
   <p class="foot">سجل حساباتي</p>
 </div>
+<script>
+/* تسجيل عامل الخدمة — شرط لظهور خيار التثبيت في المتصفح */
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
+/* زر تثبيت مباشر لو المتصفح أتاحه */
+var dp=null;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();dp=e;
+  var b=document.getElementById("ibtn");
+  if(b){b.style.display="block";b.onclick=function(){dp.prompt();dp=null;b.style.display="none";};}
+});
+window.addEventListener("appinstalled",function(){
+  var b=document.getElementById("ibtn");if(b)b.style.display="none";
+});
+</script>
 </body>
 </html>
