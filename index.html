@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>سجل حساباتي</title>
 <meta name="theme-color" content="#E9EEEB">
 <meta name="mobile-web-app-capable" content="yes">
@@ -47,7 +47,7 @@ header::after{content:"";position:absolute;inset:auto -60px -70px auto;width:220
   border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,var(--hdrglow)),transparent 70%)}
 .brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1;max-width:640px;margin:0 auto}
 .back{width:38px;height:38px;border-radius:12px;border:1px solid var(--hdrline);background:var(--hdrfill);
-  color:#fff;display:none;place-items:center;cursor:pointer;flex:none;transition:transform .12s,background .15s}
+  color:var(--hdrtx);display:none;place-items:center;cursor:pointer;flex:none;transition:transform .12s,background .15s}
 .back:active{transform:scale(.92);background:var(--hdron)}
 .back.on{display:grid}
 .logo{width:40px;height:40px;border-radius:11px;background:var(--gold);
@@ -242,7 +242,6 @@ nav .nadd:active .naddc{transform:scale(.93)}
   align-items:flex-end;justify-content:center}
 .ovl.show{display:flex}
 .grab{display:block;width:44px;height:5px;border-radius:3px;background:#E2E7EE;margin:-4px auto 14px}
-  display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;transition:transform .12s,border-color .15s,background .15s}
 .ghost{width:100%;border:0;background:none;color:var(--mut);font-family:inherit;font-size:0.9375rem;font-weight:700;padding:13px;cursor:pointer;margin-top:6px}
 #lock{position:fixed;inset:0;z-index:200;background:var(--ink);
   display:none;align-items:center;justify-content:center;padding:24px}
@@ -341,7 +340,7 @@ section{animation:fade .25s ease}
 .sugg button{margin-right:auto;border:0;background:#1E5FA8;color:#fff;border-radius:9px;padding:7px 13px;
   font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap}
 .req{color:var(--out);font-weight:700}
-.dl{border:0;background:none;color:#C3CBD6;font-size:0.7812rem;cursor:pointer;padding:3px 0}
+.dl{border:0;background:none;color:var(--mut);font-size:0.84rem;cursor:pointer;padding:10px 6px}
 .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .hc{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:#fff;min-width:0;transition:transform .12s,box-shadow .15s;container-type:inline-size}
 .hc:active{transform:scale(.985);box-shadow:var(--sh)}
@@ -409,7 +408,7 @@ section{animation:fade .25s ease}
 .ritem:active{background:#F7F9FC}
 /* شريط إجراءات الحركة */
 .racts{display:flex;gap:7px;justify-content:flex-start;padding:0 0 10px 0;margin-top:-4px}
-.rbtn{width:38px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--mut);
+.rbtn{width:44px;height:40px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--mut);
   display:grid;place-items:center;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
 .rbtn svg{width:17px;height:17px}
 .rbtn:active{transform:scale(.93)}
@@ -656,7 +655,7 @@ section{animation:fade .25s ease}
 <section id="log" class="hide">
   <div class="card">
     <div class="ch"><h3>عملياتك</h3><span class="note" id="logcnt"></span></div>
-    <input id="q" placeholder="ابحث بالبيان أو الاسم أو المبلغ…" oninput="renderLog()" style="margin-bottom:10px">
+    <input id="q" placeholder="ابحث بالبيان أو الاسم أو المبلغ…" oninput="clearTimeout(window._qT);window._qT=setTimeout(renderLog,180)" style="margin-bottom:10px">
     <div class="two" style="margin-bottom:8px">
       <div><select id="lsort" onchange="setSort(this.value)">
         <option value="d">الأحدث أولاً</option>
@@ -760,6 +759,7 @@ section{animation:fade .25s ease}
     <button class="btn s" onclick="document.getElementById('imp').click()">استعادة نسخة احتياطية</button>
     <input type="file" id="imp" accept=".json" onchange="restore(event)">
     <div style="margin-top:18px">
+      <div id="bkwarn" class="bkw hide"></div>
       <div class="kv"><span>عدد العمليات المحفوظة</span><b id="cnt" class="num">0</b></div>
       <div class="kv"><span>المساحة المستخدمة</span><b id="usg" class="num">—</b></div>
       <div class="kv"><span>في انتظار الإرسال</span><b id="pend" class="num">0</b></div>
@@ -847,6 +847,9 @@ section{animation:fade .25s ease}
       <div id="distwrap" class="hide" style="margin-top:8px">
         <label class="swrow n"><span>توزيع المبلغ السنوي على الشهور (يستحق ١/١٢ كل شهر)</span><input type="checkbox" id="sa_dist" checked></label>
       </div>
+      <div style="margin-top:8px">
+        <label class="swrow n"><span>الشهر الجاري لا يُحتسب إلا بعد اكتماله<br><span class="mini">مناسب لو القبض كل فترة (٦ شهور أو سنة) — من غيره الشهر يستحق كاملاً من أول يوم فيه</span></span><input type="checkbox" id="sa_acr"></label>
+      </div>
       <button class="btn p" onclick="saveSal()">حفظ الإعداد</button>
     </div>
     <div id="salbox"></div>
@@ -874,23 +877,23 @@ section{animation:fade .25s ease}
   <div id="pfov" class="pfov"></div>
   <div class="card sec closed" id="sec_cash">
     <div class="ch" onclick="secTgl('cash')" style="cursor:pointer"><h3>النقدية والبنوك <span class="cnt" id="cnt_cash"></span></h3><span class="chev">‹</span></div>
-    <div class="secb"><a class="addln" onclick="go(\'reg\')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_cash"></div></div>
+    <div class="secb"><a class="addln" onclick="go('reg')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_cash"></div></div>
   </div>
   <div class="card sec closed" id="sec_as">
     <div class="ch" onclick="secTgl('as')" style="cursor:pointer"><h3>الممتلكات <span class="cnt" id="cnt_as"></span></h3><span class="chev">‹</span></div>
-    <div class="secb"><a class="addln" onclick="go(\'reg\')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_as"></div></div>
+    <div class="secb"><a class="addln" onclick="go('reg')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_as"></div></div>
   </div>
   <div class="card sec closed" id="sec_dbt">
     <div class="ch" onclick="secTgl('dbt')" style="cursor:pointer"><h3>ديون عليك <span class="cnt" id="cnt_dbt"></span></h3><span class="chev">‹</span></div>
-    <div class="secb"><a class="addln" onclick="go(\'reg\')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_dbt"></div></div>
+    <div class="secb"><a class="addln" onclick="go('reg')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_dbt"></div></div>
   </div>
   <div class="card sec closed" id="sec_due">
     <div class="ch" onclick="secTgl('due')" style="cursor:pointer"><h3>مستحقات لك <span class="cnt" id="cnt_due"></span></h3><span class="chev">‹</span></div>
-    <div class="secb"><a class="addln" onclick="go(\'reg\')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_due"></div></div>
+    <div class="secb"><a class="addln" onclick="go('reg')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_due"></div></div>
   </div>
   <div class="card sec closed" id="sec_zak">
     <div class="ch" onclick="secTgl('zak')" style="cursor:pointer"><h3>الزكاة <span class="cnt" id="cnt_zak"></span></h3><span class="chev">‹</span></div>
-    <div class="secb"><a class="addln" onclick="go(\'reg\')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_zak"></div></div>
+    <div class="secb"><a class="addln" onclick="go('reg')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_zak"></div></div>
   </div>
 </section>
 
@@ -905,7 +908,7 @@ section{animation:fade .25s ease}
   </div>
   <div class="card sec" id="sec_gr">
     <div class="ch" onclick="secTgl('gr')" style="cursor:pointer"><h3>البنود <span class="cnt" id="cnt_gr"></span></h3><span class="chev">‹</span></div>
-    <div class="secb"><a class="addln" onclick="go(\'reg\')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_gr"></div></div>
+    <div class="secb"><a class="addln" onclick="go('reg')">الإضافة من تبويب «تسجيل» ↗</a><div id="pf_gr"></div></div>
   </div>
 </section>
 
@@ -1314,13 +1317,14 @@ function exportXLS(){
   T(b4,H4.length,"الملخص","سجل حساباتي   |   المُعد: "+per+"   |   الفترة: "+rng);HD(b4,H4);
   let m=1;
   CU.forEach(cu=>{const f=all.filter(r=>r.cur===cu);
-    const i1=f.filter(r=>r.k==="in").reduce((a,r)=>a+r.amt,0);
+    /* العُهد المستلمة (IN-CST) فلوس الشركة مش دخل شخصي — استبعادها من المستلَم والصافي */
+    const i1=f.filter(r=>r.k==="in"&&r.cat!=="IN-CST").reduce((a,r)=>a+r.amt,0);
     const c1=f.filter(r=>r.k==="co").reduce((a,r)=>a+(r.ref?-r.amt:r.amt),0);
     const o1=f.filter(r=>r.k==="out").reduce((a,r)=>a+r.amt,0);
     b4.add([[m++,S.nu],[cu,S.tx],[R2(i1),S.mn],[R2(c1),S.mn],[R2(o1),S.mn],[R2(i1-o1),S.mn],[f.length,S.nu]],32);});
   if(!CU.length){const r4=b4.add([["لا توجد حركة بعد",S.spc]],30);b4.merge(r4,H4.length);}
   TOT(b4,"الإجمالي العام",H4.length,{6:all.length});
-  const nr=b4.add([["ملاحظة: «مدفوع عن الشركة» يشمل المطالبات والصرف من العُهد — لذلك لا يُخصم من «صافي المتاح».",S.spc]],28);
+  const nr=b4.add([["ملاحظة: «المستلَم» هنا لا يشمل عُهد الشركة، و«مدفوع عن الشركة» يشمل المطالبات والصرف من العُهد — لذلك لا يُخصم من «صافي المتاح».",S.spc]],28);
   b4.merge(nr,H4.length);
   /* ٥) الحساب الجاري والمستحقات */
   const H5=["البند","القيمة","ملاحظات"];
@@ -1495,7 +1499,7 @@ let DB=JSON.parse(localStorage.getItem("bg_recs")||"[]");
 let CFG=JSON.parse(localStorage.getItem("bg_cfg")||"{}");
 if(PRESET_URL&&!CFG.url){CFG.url=PRESET_URL;localStorage.setItem("bg_cfg",JSON.stringify(CFG));}
 let kind="in",img=null,cat="",sub="",filt="all",rptYear="all",lsort="d";
-const APPVER="13.00";
+const APPVER="13.10";
 /* آيفون/آيباد/سفاري — سلوك الطباعة والتنزيل مختلف ولازم مسار خاص */
 const IOSLIKE=(function(){try{
   const ua=navigator.userAgent||"";
@@ -1530,9 +1534,18 @@ function save(){
     }
   }
 }
-const saveCfg=()=>localStorage.setItem("bg_cfg",JSON.stringify(CFG));
+/* كتابة آمنة: امتلاء المساحة كان بيرمي استثناء يقطع الحذف/الطابور نص السكة — نشيل صور قديمة ونعيد المحاولة */
+function safeSet(k,v){
+  try{ localStorage.setItem(k,v); return true; }
+  catch(e){
+    try{ dropOldImages(); localStorage.setItem("bg_recs",JSON.stringify(DB)); }catch(_){}
+    try{ localStorage.setItem(k,v); return true; }
+    catch(e2){ toast("مساحة الجهاز امتلت — احفظ نسخة احتياطية وامسح إيصالات قديمة",1); return false; }
+  }
+}
+const saveCfg=()=>safeSet("bg_cfg",JSON.stringify(CFG));
 let TRASH=JSON.parse(localStorage.getItem("bg_trash")||"[]");
-const saveTRASH=()=>localStorage.setItem("bg_trash",JSON.stringify(TRASH));
+const saveTRASH=()=>safeSet("bg_trash",JSON.stringify(TRASH));
 let editId=0;
 function askNum(t,m,val,fn){
   $("mt").textContent=t;$("mp").textContent=m;
@@ -1566,10 +1579,10 @@ const SEED_BR=[];
 if(!OPEN){OPEN={claim:0,date:today()};localStorage.setItem("bg_open",JSON.stringify(OPEN));}
 if(!OPEN.br){OPEN.br=[];}
 let OUT=JSON.parse(localStorage.getItem("bg_outbox")||"[]");
-const savePF=()=>localStorage.setItem("bg_pf",JSON.stringify(PF));
-const saveSAL=()=>localStorage.setItem("bg_sal",JSON.stringify(SAL));
-const saveOPEN=()=>localStorage.setItem("bg_open",JSON.stringify(OPEN));
-const saveOUT=()=>localStorage.setItem("bg_outbox",JSON.stringify(OUT));
+const savePF=()=>safeSet("bg_pf",JSON.stringify(PF));
+const saveSAL=()=>safeSet("bg_sal",JSON.stringify(SAL));
+const saveOPEN=()=>safeSet("bg_open",JSON.stringify(OPEN));
+const saveOUT=()=>safeSet("bg_outbox",JSON.stringify(OUT));
 const PT={cash:{t:"حساب بنكي أو نقدية",n:"اسم البنك أو الحساب",a:"الرصيد الحالي"},as:{t:"أصل / ممتلك",n:"اسم الأصل",a:"القيمة التقديرية"},dbt:{t:"دين عليك",n:"اسم الدائن",a:"مبلغ الدين"},due:{t:"مستحق لك",n:"اسم المدين",a:"المبلغ المستحق"},gr:{t:"ضمان / التزام أدبي",n:"البند",a:"المبلغ"},zak:{t:"زكاة سنة",n:"السنة",a:"قيمة الزكاة"}};
 function queueOp(op){OUT.push(op);saveOUT();syncNow(false);}
 function months(fromYM,toYM){const p=(fromYM||"2026-01").split("-");
@@ -1580,7 +1593,9 @@ function months(fromYM,toYM){const p=(fromYM||"2026-01").split("-");
 function salCalc(){
   const nowYM=today().slice(0,7);
   const endYM=(SAL.end&&SAL.end<nowYM)?SAL.end:null;   /* آخر شهر استحقاق — يوقف التراكم بعد التقاعد */
-  const n=months(SAL.start,endYM);let acc=0,per="لم يُحدَّد بعد";
+  let n=months(SAL.start,endYM);
+  if(SAL.acr==="e"&&!endYM)n=Math.max(0,n-1);   /* اختيار العميل: الشهر الجاري لا يُحتسب إلا بعد اكتماله */
+  let acc=0,per="لم يُحدَّد بعد";
   if(SAL.amt>0){
     if(SAL.mode==="m"){acc=n*SAL.amt;per=fmt(SAL.amt)+" "+(CSY[SAL.cur]||SAL.cur)+" شهرياً × "+n+" شهر";}
     else if(SAL.dist){acc=Math.round(n*SAL.amt/12*100)/100;per=fmt(SAL.amt)+" سنوياً — موزّع "+fmt(SAL.amt/12)+" شهرياً × "+n+" شهر";}
@@ -1606,7 +1621,9 @@ function claimCalc(){
     const u=(typeof r.usd==="number")?r.usd:(r.cur==="دولار"?r.amt:null);
     if(r.k==="co"){
       if(r.src==="cust"){
-        if(u!=null){
+        if(u==null){un++;per[r.cur]=(per[r.cur]||0)+(r.ref?-r.amt:r.amt);}  /* كانت بتختفي بصمت من كل الحسابات */
+        else if(r.ref){cust+=u;}  /* ردّ لمصروف عهدة = رجوع المبلغ للعهدة — معالجة موحّدة مع الكشوف */
+        else{
           const fromCust=Math.min(u,Math.max(0,cust));
           cust-=fromCust;
           const extra=Math.round((u-fromCust)*100)/100;
@@ -1619,7 +1636,7 @@ function claimCalc(){
     }
     else if(r.k==="in"&&!r.ref){
       if(CLAIM_DED.includes(r.cat)){if(u==null){un++;per[r.cur]=(per[r.cur]||0)-r.amt;}else pay+=u;}
-      else if(r.cat==="IN-CST"){ if(u!=null) cust+=u; }
+      else if(r.cat==="IN-CST"){ if(u!=null)cust+=u; else{un++;per[r.cur]=(per[r.cur]||0)+r.amt;} }
     }
   });
   sp=Math.round(sp*100)/100;pay=Math.round(pay*100)/100;cust=Math.round(cust*100)/100;over=Math.round(over*100)/100;
@@ -1646,18 +1663,18 @@ function renderCo2(){
    (sc.other?`<p class="note" style="margin-top:8px">${sc.other} قبض راتب بعملة مختلفة عن عملة الإعداد — راجعها.</p>`:"")
    :`<p class="note">حدِّد نظام الراتب من «الإعداد» ليُحتسب المستحق ويُخصم المقبوض.</p>`);
   $("extlist").innerHTML=SAL.extras.length?SAL.extras.map(x=>
-   `<div class="row"><span class="mid"><span class="t1">${x.label}</span><span class="t2">${x.date}</span></span>
-    <span class="amt"><b class="num v in">+${fmt(x.amt)}</b><span>${CSY[x.cur]||x.cur}</span>
-    <button class="dl" onclick="delExt(${x.id})">حذف</button></span></div>`).join(""):"";
+   `<div class="row"><span class="mid"><span class="t1">${esc(x.label)}</span><span class="t2">${esc(x.date)}</span></span>
+    <span class="amt"><b class="num v in">+${fmt(x.amt)}</b><span>${CSY[x.cur]||esc(x.cur)}</span>
+    <button class="dl" onclick="delExt(${Number(x.id)||0})">حذف</button></span></div>`).join(""):"";
 }
-function toggleSalCfg(){const b=$("salcfg");b.classList.toggle("hide");if(!b.classList.contains("hide")){salMode(SAL.mode);$("sa_amt").value=SAL.amt||"";$("sa_cur").value=SAL.cur;$("sa_start").value=SAL.start;$("sa_end").value=SAL.end||"";$("sa_dist").checked=!!SAL.dist;}}
+function toggleSalCfg(){const b=$("salcfg");b.classList.toggle("hide");if(!b.classList.contains("hide")){salMode(SAL.mode);$("sa_amt").value=SAL.amt||"";$("sa_cur").value=SAL.cur;$("sa_start").value=SAL.start;$("sa_end").value=SAL.end||"";$("sa_dist").checked=!!SAL.dist;$("sa_acr").checked=SAL.acr==="e";}}
 function salMode(m){SAL._m=m;$("sm_m").classList.toggle("on",m==="m");$("sm_y").classList.toggle("on",m==="y");$("distwrap").classList.toggle("hide",m!=="y");}
 function saveSal(){
   const a=parseFloat($("sa_amt").value);
   if(!a||a<=0){toast("اكتب مبلغ الراتب",1);return;}
-  SAL.mode=SAL._m||SAL.mode;SAL.amt=a;SAL.cur=$("sa_cur").value;SAL.start=$("sa_start").value||SAL.start;SAL.end=$("sa_end").value||"";SAL.dist=$("sa_dist").checked?1:0;delete SAL._m;
+  SAL.mode=SAL._m||SAL.mode;SAL.amt=a;SAL.cur=$("sa_cur").value;SAL.start=$("sa_start").value||SAL.start;SAL.end=$("sa_end").value||"";SAL.dist=$("sa_dist").checked?1:0;SAL.acr=$("sa_acr").checked?"e":"s";delete SAL._m;
   saveSAL();$("salcfg").classList.add("hide");renderCo2();
-  queueOp({e:"sal",act:"set",cfg:{mode:SAL.mode,amt:SAL.amt,cur:SAL.cur,start:SAL.start,end:SAL.end,dist:SAL.dist}});
+  queueOp({e:"sal",act:"set",cfg:{mode:SAL.mode,amt:SAL.amt,cur:SAL.cur,start:SAL.start,end:SAL.end,dist:SAL.dist,acr:SAL.acr||"s"}});
   toast("تم حفظ إعداد الراتب");
 }
 function openExt(){$("extform").classList.remove("hide");$("ex_lbl").value="";$("ex_amt").value="";$("ex_date").value=today();}
@@ -1689,6 +1706,11 @@ function renderTrash(){
 }
 function restoreTrash(tid){
   const x=TRASH.find(v=>v.tid===tid); if(!x)return;
+  /* لو أمر حذف البند لسه معلّق في الصادر — لازم يتشال، وإلا البند المسترجَع يتحذف تاني لوحده */
+  {const rid=x.k==="rec"?(x.d&&x.d.id):(x.k==="pf"?(x.d&&x.d.item&&x.d.item.id):(x.d&&x.d.id));
+   const ecat=x.k==="rec"?"rec":(x.k==="pf"?"pf":"ext");
+   OUT=OUT.filter(o=>!(o.e===ecat&&o.act==="del"&&o.item&&String(o.item.id)===String(rid)&&(ecat!=="pf"||o.t===undefined||o.t===x.d.t)));saveOUT();
+   try{delete MISS["r"+rid];if(x.k==="pf")delete MISS["p"+x.d.t+"-"+rid];if(x.k==="ext")delete MISS["x"+rid];}catch(e){}}
   if(x.k==="rec"){ if(!DB.find(r=>r.id===x.d.id)){const r=Object.assign({},x.d);r.sy=0;DB.push(r);save();} }
   else if(x.k==="pf"){ const t=x.d.t; if(!PF[t].find(v=>v.id===x.d.item.id)){PF[t].push(x.d.item);savePF();queueOp({e:"pf",t:t,act:"add",item:x.d.item});} }
   else if(x.k==="ext"){ if(!SAL.extras.find(v=>v.id===x.d.id)){SAL.extras.push(x.d);saveSAL();queueOp({e:"ext",act:"add",item:x.d});} }
@@ -1999,6 +2021,35 @@ function desAr(t){const x=String(t||"");
 function desFull(t){const a=desAr(t);const x=String(t||"").trim();
   return a?(a+" — "+x):x;}
 function dmy(d){const p=String(d||"").split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:(d||"");}
+function custExtras(){ /* إعادة تشغيل زمني: الزائد المدفوع من ماله فوق رصيد العهدة — نفس منطق claimCalc بالظبط */
+  let cust=0;const ex=[];
+  [...DB].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||a.id-b.id).forEach(r=>{
+    const u=(typeof r.usd==="number")?r.usd:(r.cur==="دولار"?r.amt:null);
+    if(r.k==="in"&&!r.ref&&r.cat==="IN-CST"){if(u!=null)cust+=u;}
+    else if(r.k==="co"&&r.src==="cust"&&u!=null){
+      if(r.ref){cust+=u;}
+      else{
+        const fromCust=Math.min(u,Math.max(0,cust));cust-=fromCust;
+        const extra=Math.round((u-fromCust)*100)/100;
+        if(extra>0)ex.push({r:r,extra:extra});
+      }
+    }
+  });
+  return ex;
+}
+function claimPre(){ /* صافي حركة المطالبة للعمليات خارج فترة الفلتر — سطر «رصيد ما قبل الفترة» في الكشف */
+  const F=new Set(rptFilter().map(r=>r.id));
+  let sp=0,pay=0;
+  custExtras().forEach(e=>{if(!F.has(e.r.id))sp+=e.extra;});
+  DB.forEach(r=>{
+    if(F.has(r.id))return;
+    const u=(typeof r.usd==="number")?r.usd:(r.cur==="دولار"?r.amt:null);
+    if(u==null)return;
+    if(r.k==="co"&&r.src!=="cust"){if(r.ref)pay+=u;else sp+=u;}
+    else if(r.k==="in"&&!r.ref&&CLAIM_DED.includes(r.cat))pay+=u;
+  });
+  return Math.round((sp-pay)*100)/100;
+}
 function claimRows(){
   const R=[];
   /* ١) مكوّنات الرصيد الافتتاحي بتفاصيلها */
@@ -2017,10 +2068,20 @@ function claimRows(){
       R.push({g:"مصروفات مستجدة",d:r.date,s:catName(r.cat)+(r.sub?" — "+r.sub:"")+(r.des?" — "+r.des:""),
         src:r.who||"",orig:(r.cur!=="دولار"?r.amt:""),ocur:(r.cur!=="دولار"?r.cur:""),fx:r.fx||"",
         usd:(u==null?0:u),n:(u==null?"بانتظار سعر الصرف":((r.img||r.imgf)?"إيصال مرفق":"")),st:"قيد المراجعة"});});
+  /* ٣) الزائد المدفوع من ماله فوق رصيد العهدة — جزء من رصيد المطالبة، كان غايب عن الكشف المطبوع */
+  if(CLM.st!=="ok"){
+    const F=new Set(rptFilter().map(r=>r.id));
+    custExtras().filter(e=>F.has(e.r.id)).forEach(e=>{
+      R.push({g:"مدفوع من ماله زيادة عن رصيد العهدة",d:e.r.date,
+        s:catName(e.r.cat)+(e.r.sub?" — "+e.r.sub:"")+(e.r.des?" — "+e.r.des:""),
+        src:e.r.who||"",orig:"",ocur:"",fx:e.r.fx||"",usd:e.extra,
+        n:"جزء من مصروف عهدة "+fmt(e.r.amt)+" "+(CSY[e.r.cur]||e.r.cur),st:"قيد المراجعة"});});
+  }
   return R;
 }
 function claimPaid(){
-  return rptFilter().filter(r=>(r.k==="in"&&!r.ref&&CLAIM_DED.includes(r.cat))||(r.k==="co"&&r.ref))
+  /* ردّ مصروف العهدة بيرجع لرصيد العهدة (معالجة موحّدة مع claimCalc) — مش ضمن المسدَّد من الشركة */
+  return rptFilter().filter(r=>(r.k==="in"&&!r.ref&&CLAIM_DED.includes(r.cat))||(r.k==="co"&&r.ref&&r.src!=="cust"))
     .sort((a,c)=>String(a.date).localeCompare(String(c.date)))
     .map(r=>({d:r.date,s:(r.k==="co"?"ردّ مصروف — ":"")+catName(r.cat)+(r.des?" — "+r.des:""),who:r.who||"",
       orig:(r.cur!=="دولار"?r.amt:""),ocur:(r.cur!=="دولار"?r.cur:""),fx:r.fx||"",
@@ -2049,7 +2110,9 @@ function claimXLS(){
      TOTX(b1,"إجمالي المسدَّد",4,{2:P.reduce((a,r)=>a+r.usd,0)});
    }
    b1.add([["",S.tx],["",S.tx],["",S.tx],["",S.tx]],10);
-   TOTX(b1,"رصيد المطالبة",4,{2:(R.reduce((a,r)=>a+r.usd,0)-P.reduce((a,r)=>a+r.usd,0))});
+   {const pre=claimPre();
+    if(pre)b1.add([["+ صافي حركة ما قبل الفترة المعروضة",S.txw],["",S.ct],[R2(pre),S.mn],["",S.tx]],28);
+    TOTX(b1,"رصيد المطالبة",4,{2:(R.reduce((a,r)=>a+r.usd,0)+pre-P.reduce((a,r)=>a+r.usd,0))});}
    /* الملاحظات بعد الرصيد — مش وسط الحساب */
    {const w=R.filter(r=>r.n&&r.n.indexOf("بانتظار سعر الصرف")>-1);
     if(w.length){
@@ -2108,7 +2171,8 @@ function claimPrint(){
   const GT={};R0.forEach(r=>GT[r.g]=(GT[r.g]||0)+r.usd);
   const R=R0.slice().sort((a,b)=>(GT[b.g]-GT[a.g])||String(a.d||"").localeCompare(String(b.d||"")));
   if(!R.length){toast("لا توجد بنود مطالبة",1);return;}
-  const bal=Math.round((R.reduce((a,r)=>a+r.usd,0)-P.reduce((a,r)=>a+r.usd,0))*100)/100;
+  const pre=claimPre(); /* حركة ما قبل الفترة — الرقم النهائي يفضل صحيحاً مهما كان الفلتر */
+  const bal=Math.round((R.reduce((a,r)=>a+r.usd,0)+pre-P.reduce((a,r)=>a+r.usd,0))*100)/100;
   const HEAD=`<tr><th class="c" style="width:7%">م</th><th class="c" style="width:12%">التاريخ</th>`+
     `<th>البيان</th><th class="c" style="width:12%">الأصلي</th><th class="c" style="width:10%">العملة</th>`+
     `<th class="c" style="width:11%">سعر الصرف</th><th class="n" style="width:15%">بالدولار</th></tr>`;
@@ -2122,6 +2186,7 @@ function claimPrint(){
       `<td class="c">${r.orig?fmt(r.orig):""}</td><td class="c">${esc(r.ocur||"")}</td>`+
       `<td class="c">${r.fx?fmt(r.fx):""}</td><td class="n">${r.usd?fmt(r.usd):"—"}</td></tr>`;});
   ROWS+=`<tr class="tot"><td colspan="6">إجمالي المطالبة</td><td class="n">${fmt(R.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
+  if(pre)ROWS+=`<tr class="tot"><td colspan="6">+ صافي حركة ما قبل الفترة المعروضة</td><td class="n">${fmt(pre)}</td></tr>`;
   if(P.length)ROWS+=`<tr class="tot"><td colspan="6">− المسدَّد من الشركة (${P.length})</td><td class="n">${fmt(P.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
   ROWS+=`<tr class="net"><td colspan="6">${bal>=0?"رصيد المطالبة":"مستحق للشركة (الرصيد سالب)"}</td><td class="n ${bal>=0?"p":"m"}">${fmt(bal)} $</td></tr>`;
   if(CLM.sal&&SAL.amt>0){const sc=salCalc();
@@ -2274,7 +2339,7 @@ function payLog(t,id){
     `<div class="kv"><span>المسدَّد</span><b class="num in">${fmt(pd)}</b></div>`+
     `<div class="kv"><span>المتبقي</span><b class="num out">${fmt(a-pd)}</b></div>`+
     (L.length?`<div class="hsec" style="margin:12px 2px 6px">الدفعات المسجَّلة (${L.length})</div>`+
-      L.slice().reverse().map(p=>`<div class="kv"><span>${p.d}</span><b class="num">${fmt(p.a)} ${CSY[x.cur]||""}</b></div>`).join("")
+      L.slice().reverse().map(p=>`<div class="kv"><span>${esc(p.d)}</span><b class="num">${fmt(p.a)} ${CSY[x.cur]||""}</b></div>`).join("")
      :`<p class="note" style="margin-top:10px">لا توجد دفعات مفصَّلة.${pd?" المسدَّد ("+fmt(pd)+") مقيَّد كرصيد سابق.":""}</p>`);
   $("rs_edit").onclick=()=>{closeRec();openPf(t,id);};
   $("rs_edit").textContent="تعديل البند";
@@ -2339,6 +2404,7 @@ function go(s,isBack){
       if(!REGMODE)regKind("co");
       else{const sec=$("form");if(sec){sec.classList.remove("hide");}}
       {const b=$("f_cancel");if(b)b.textContent=editId?"إلغاء التعديل":"مسح الخانات";}
+      try{renderStrip();}catch(e){}  /* شريط الأرصدة كان بيفضل فاضي لحد ما يزور «الحركات» */
       bkChk2();
     }};
   if(REN[s]){try{REN[s]();}catch(e){
@@ -2357,6 +2423,8 @@ function openForm(k,eid){
   kind=k;img=null;cat="";sub="";catManual=false;editId=eid||0;
   const E=editId?DB.find(r=>r.id===editId):null;
   if(E){kind=E.k;k=E.k;}
+  /* نص زر الإلغاء حسب السياق — «مسح الخانات» في وضع التعديل كان مضللاً (بيرجع من غير حفظ) */
+  {const b=$("f_cancel");if(b)b.textContent=editId?"إلغاء التعديل":(REGMODE?"مسح الخانات":"إلغاء ورجوع");}
   $("prev").classList.add("hide");$("f_img").value="";
   $("flabel").innerHTML='<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> تصوير الإيصال أو اختيار صورة';
   $("f_date").value=today();$("f_amt").value="";$("f_des").value="";$("f_who").value="";
@@ -2418,6 +2486,8 @@ function openForm(k,eid){
 function updFX(){
   const c=$("f_cur").value;
   $("fxwrap").classList.toggle("hide",c==="دولار");
+  /* عملة غير الدولار = سعر الصرف مهم — افتح «تفاصيل أكتر» تلقائياً عشان الحقل يبان */
+  if(c!=="دولار"&&$("more").classList.contains("hide"))toggleMore(true);
   if(c==="ريال سعودي"&&!$("f_fx").value){$("f_fx").value=3.75;$("fxinfo").textContent="السعر الرسمي الثابت للريال مقابل الدولار";}
 }
 $("f_cur").addEventListener("change",()=>{$("f_fx").value="";$("fxinfo").textContent="";updFX();});
@@ -2519,9 +2589,11 @@ function pickDate(el){
   el.parentNode.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));el.classList.add("on");
 }
 function pickCur(el){
+  const changed=$("f_cur").value!==el.dataset.c;
   $("f_cur").value=el.dataset.c;
   el.parentNode.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));el.classList.add("on");
-  updFX();
+  /* إطلاق change ضروري عند تغيير فعلي: بيمسح سعر الصرف القديم — لمسة مكررة على نفس العملة متمسحش */
+  if(changed)$("f_cur").dispatchEvent(new Event("change"));
 }
 function syncCat(){ /* يزامن شرائح النموذج المختصر مع شرائح التفاصيل */
   const c1=$("catchips");if(c1)[...c1.children].forEach(x=>x.classList.toggle("on",x.dataset.c===cat));
@@ -2559,8 +2631,8 @@ function saveRec(){
   if(!cat){cat=DEF[kind];sub="";}
   if(!sub){const nd=TREE[kind].find(x=>x.c===cat);sub=nd?nd.s[0]:"يُحدد بالبيان";}
   const ref=kind==="co"&&$("f_ref").checked;
-  const fx=parseFloat($("f_fx").value)||0;
   const cur=$("f_cur").value;
+  const fx=cur==="دولار"?0:(parseFloat($("f_fx").value)||0);  /* الدولار لا يحتاج سعر صرف أبداً — حماية من سعر ملتصق */
   try{localStorage.setItem("bg_lastcur",cur);}catch(e){}
   const fromCust=kind==="co"&&$("f_cst").checked;
   let fdate=$("f_date").value;
@@ -2591,7 +2663,7 @@ function saveRec(){
   }
   DB.push(Object.assign({id:Date.now()},base));
   save();syncBar();
-  if(CFG.url){syncNow(false);toast("تم الحفظ والإرسال للمحاسب");}else toast("تم حفظ العملية");
+  if(CFG.url){syncNow(false);toast("اتسجلت «"+label(kind)+"» واتبعتت للمحاسب");}else toast("اتسجلت «"+label(kind)+"»");
   if(REGMODE){const k0=kind;openForm(k0);try{renderLog();}catch(e){}}else go("reg");
 }
 function arDate(s){const d=new Date(s+"T00:00:00");return d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear();}
@@ -2722,6 +2794,7 @@ function setView(v){
 }
 /* زر واحد يطبع التقرير المعروض */
 function rptPrint(){
+  if(rptView==="rchart"){toast("الرسم البياني للعرض فقط — هيتطبع «تقرير الشركة»");}
   ({rco:printCo,rpos:printPos,rgr:printGr,rchart:printCo})[rptView||"rco"]();
 }
 function ymLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
@@ -2864,6 +2937,8 @@ function printPos(){
   const d=new Date(), who=CFG.name||"—";
   const c=claimCalc(), sc=salCalc();
   const A=[],L=[],NV=[];
+  /* النقدية والبنوك كانت ساقطة من المركز المالي المطبوع — الصافي كان ناقص كل السيولة */
+  (PF.cash||[]).forEach(x=>{const a=+x.amt||0;(a?A:NV).push({g:"cash",n:x.name,v:a,cu:x.cur||"دولار"});});
   (PF.as||[]).forEach(x=>{const a=+x.amt||0;(a?A:NV).push({g:"as",n:x.name,v:a,cu:x.cur||"دولار"});});
   if(c.bal>0)A.push({g:"co",n:"مطالبة الشركة — الحساب الجاري",v:c.bal,cu:"دولار"});
   if(c.bal<0)L.push({g:"co",n:"مستحق للشركة — الحساب الجاري",v:-c.bal,cu:"دولار"});
@@ -2872,7 +2947,7 @@ function printPos(){
   (PF.dbt||[]).forEach(x=>{const r=(+x.amt||0)-(+x.paid||0);if(r>0)L.push({g:"dbt",n:x.name,v:r,cu:x.cur||"دولار"});});
   (PF.zak||[]).forEach(x=>{const a=+x.amt||0;if(a)L.push({g:"zak",n:"زكاة "+(x.year||x.name||""),v:a,cu:x.cur||"دولار"});});
   if(c.cust)L.push({g:"cst",n:"رصيد العهدة غير المسوَّى",v:c.cust,cu:"دولار"});
-  const NAMES={as:"الممتلكات والأصول",co:"مستحقات لدى الشركة",due:"مستحقات لدى أشخاص",dbt:"ديون",zak:"زكاة مستحقة",cst:"عهد الشركة"};
+  const NAMES={cash:"النقدية والبنوك",as:"الممتلكات والأصول",co:"مستحقات لدى الشركة",due:"مستحقات لدى أشخاص",dbt:"ديون",zak:"زكاة مستحقة",cst:"عهد الشركة"};
   const sec=(title,list)=>{
     if(!list.length)return "";
     const byG={};list.forEach(x=>{const k=x.g+"|"+x.cu;(byG[k]=byG[k]||[]).push(x);});
@@ -3059,7 +3134,7 @@ function zkCash(){
 }
 function zkBook(v){
   const y=String(new Date().getFullYear());
-  if((PF.zak||[]).find(x=>String(x.year)===y)){toast("زكاة "+y+" مسجَّلة بالفعل — عدّلها من بنودها",1);return;}
+  if((PF.zak||[]).find(x=>String(x.year||x.name||"")===y)){toast("زكاة "+y+" مسجَّلة بالفعل — عدّلها من بنودها",1);return;} /* البند اليدوي بيتخزن في name */
   const item={id:Date.now(),year:y,amt:v,cur:"دولار",st:"مقترحة — للمراجعة",note:"من حاسبة الزكاة"};
   PF.zak=PF.zak||[];PF.zak.push(item);savePF();
   queueOp({e:"pf",t:"zak",act:"add",item:item});
@@ -3109,6 +3184,7 @@ function renderPos(){
   if(rptCur&&!A.length&&!L.length)h+=`<div class="note">لا توجد بنود بعملة ${esc(rptCur)}.</div>`;
   h+=`<div class="hsec pf" style="margin-top:4px">أولاً: الأصول والمستحقات</div>`;
   if(A.length){
+    h+=grp("cash","النقدية والبنوك",A.filter(x=>x.g==="cash"),"in"); /* كانت داخلة الصافي من غير ما تتعرض كبنود */
     h+=grp("as","الممتلكات والأصول",A.filter(x=>x.g==="as"),"in");
     h+=grp("co","مستحقاتك لدى الشركة",A.filter(x=>x.g==="co"),"in");
     h+=grp("due","مستحقات لك عند أشخاص",A.filter(x=>x.g==="due"),"in");
@@ -3182,8 +3258,8 @@ function renderRpt(){
     return `<i class="kd ${d>0?"up":"dn"}">${d>0?"▲":"▼"} ${Math.abs(d)}%</i>`;};
   $("rkpis").innerHTML="";KPIH=
     `<div class="kpis" style="margin:4px 0 10px"><div class="kpi" onclick="kpiGo('in')" style="cursor:pointer"><span>مقبوض (${CSY[mainCur]||mainCur})</span><b class="num in">${fmt(kIn)}</b>${dlt(kIn,pIn)}</div>`+
-    `<div class="kpi" onclick="kpiGo('co')" style="cursor:pointer"><span>عن الشركة ($)</span><b class="num co">${fmt(kCo)}</b>${dlt(kCo,pCo)}</div>`+
-    `<div class="kpi" onclick="kpiGo('out')" style="cursor:pointer"><span>مصروف شخصي ($)</span><b class="num out">${fmt(kOut)}</b>${dlt(kOut,pOut)}</div></div>`;
+    `<div class="kpi" onclick="kpiGo('co')" style="cursor:pointer"><span>عن الشركة (${CSY[mainCur]||mainCur})</span><b class="num co">${fmt(kCo)}</b>${dlt(kCo,pCo)}</div>`+
+    `<div class="kpi" onclick="kpiGo('out')" style="cursor:pointer"><span>مصروف شخصي (${CSY[mainCur]||mainCur})</span><b class="num out">${fmt(kOut)}</b>${dlt(kOut,pOut)}</div></div>`;
 
   try{renderCo();}catch(e){logErr("rco",e);const el=$("rco");if(el)el.innerHTML=`<div class="note">تعذّر حساب تقرير الشركة.</div>`;}
 
@@ -3223,12 +3299,20 @@ async function cloudRestore(auto){
   if(!CFG.url){if(!auto)toast("لا يوجد رابط مزامنة",1);return;}
   if(!auto)toast("جارٍ الجلب من السجل السحابي…");
   try{
-    const r=await fetchT(CFG.url+"?action=list&key="+encodeURIComponent(CFG.key||"")+"&t="+Date.now(),null,15000);
+    const r=await fetchT(CFG.url+"?action=list&key="+encodeURIComponent(CFG.key||"")+"&rev="+encodeURIComponent(LASTREV||"")+"&t="+Date.now(),null,15000);
     const j=await r.json();
+    if(j&&j.unchanged){ /* ختم النسخة مطابق — مفيش أي جديد في الشيت، وفّرنا القراءة كلها */
+      if(!auto){go("home");toast("لا يوجد جديد من المحاسب");}
+      return;
+    }
     if(!j||!Array.isArray(j.rows))throw 0;
+    if(j.rev!==undefined){LASTREV=String(j.rev);try{localStorage.setItem("bg_rev",LASTREV);}catch(e){}}
+    /* أرقام آمنة: فاصلة عربية أو نص في الشيت كانت بتسمّم الأرصدة بـ NaN ويظهر الرصيد صفراً */
+    const num=v=>{const n=Number(String(v).replace(/,/g,"."));return isFinite(n)?n:undefined;};
     const byId=new Map(DB.map(x=>[String(x.id),x]));
     let added=0,upd=0;
     j.rows.forEach(x=>{
+      if(x.id===undefined||x.id===null||x.id===""){return;} /* صف يدوي بلا رقم عملية — تجاهله بدل ما يتضاعف كل سحبة */
       const cur=byId.get(String(x.id));
       const CP="[من عهدة الشركة]";
       let des=String(x.des||""), isCust=0;
@@ -3238,22 +3322,25 @@ async function cloudRestore(auto){
         let ch=false;
         const set=(k,v)=>{if(v!==undefined&&v!==null&&v!==""&&String(cur[k])!==String(v)){cur[k]=v;ch=true;}};
         set("cat",x.code);set("sub",x.sub);set("des",des);set("who",x.from);
-        if(x.amt!==undefined&&x.amt!=="")set("amt",Number(x.amt));
+        /* Math.abs ضروري: الشيت بيخزن المسترد بالسالب، والسالب هنا كان بيخرّب المطالبة */
+        if(x.amt!==undefined&&x.amt!==""){const a2=num(x.amt);if(a2!==undefined)set("amt",Math.abs(a2));}
         const sc=isCust?"cust":""; if((cur.src||"")!==sc){cur.src=sc;ch=true;}
         set("cur",x.cur);set("date",x.date);
-        if(x.fx!==undefined&&x.fx!=="")set("fx",Number(x.fx));
-        if(x.usd!==undefined&&x.usd!=="")set("usd",Number(x.usd));
+        if(x.fx!==undefined&&x.fx!==""){const f2=num(x.fx);if(f2!==undefined)set("fx",f2);}
+        if(x.usd!==undefined&&x.usd!==""){const u2=num(x.usd);if(u2!==undefined)set("usd",Math.abs(u2));}
         const rf=x.ref?1:0; if(cur.ref!==rf){cur.ref=rf;ch=true;}
         if(ch)upd++;
         return;
       }
-      DB.push({id:Number(x.id)||Date.now()+added,k:x.kind||"out",date:x.date||today(),amt:Math.abs(Number(x.amt)||0),
+      const uV=(x.usd===""||x.usd==null)?"":num(x.usd);
+      DB.push({id:Number(x.id)||Date.now()+added,k:x.kind||"out",date:x.date||today(),amt:Math.abs(num(x.amt)||0),
         cur:x.cur||"دولار",who:x.from||"",cat:x.code||"",sub:x.sub||"",des:des,img:"",src:isCust?"cust":"",
-        fx:Number(x.fx)||"",usd:x.usd===""?"":Number(x.usd),ref:x.ref?1:0,sy:1});
+        fx:num(x.fx)||"",usd:(uV===""||uV===undefined)?"":Math.abs(uV),ref:x.ref?1:0,sy:1});
       added++;});
-    /* حذف متبادل بين الأجهزة: المتزامن (sy=1) الغايب من الشيت في سحبتين متتاليتين = اتحذف من جهاز تاني → سلة المحذوفات */
+    /* حذف متبادل بين الأجهزة: المتزامن (sy=1) الغايب من الشيت في سحبتين متتاليتين = اتحذف من جهاز تاني → سلة المحذوفات
+       بشرط قائمة غير فاضية — شيت فاضي (رابط جديد مثلاً) ميمسحش السجل كله */
     let gone=0;
-    {const there2=new Set(j.rows.map(x=>String(x.id)));
+    if(j.rows.length){const there2=new Set(j.rows.map(x=>String(x.id)));
      const pendOp=new Set(OUT.filter(o=>o.e==="rec"&&o.item).map(o=>String(o.item.id)));
      const rm=[];
      DB.forEach(rr=>{const mk="r"+rr.id;
@@ -3283,13 +3370,38 @@ async function cloudRestore(auto){
         });
         (j2.pf.sal||[]).forEach(x=>{
           if(x.id==="CFG"){}
-          else if(x.id==="OPEN"){OPEN.claim=Number(x.amt)||OPEN.claim;saveOPEN();}
+          else if(x.id==="OPEN"){const v0=Number(x.amt);if(x.amt!==""&&x.amt!=null&&isFinite(v0))OPEN.claim=v0;saveOPEN();} /* الصفر قيمة مقصودة — كان بيتتجاهل */
           else if(x.type&&x.type.indexOf("حافز")>-1&&!SAL.extras.find(v=>String(v.id)===String(x.id)))
             SAL.extras.push({id:x.id,date:x.date.slice(0,10),label:x.label,amt:x.amt,cur:x.cur});
         });
+        /* حذف متبادل لبنود الملف الشخصي والحوافز: الغايب من الشيت في سحبتين متتاليتين (وبلا أمر معلّق
+           وبشرط إن قايمة الشيت مش فاضية — حماية من مسح جماعي خاطئ) اتحذف من جهاز تاني → السلة */
+        ["cash","as","dbt","due","gr","zak"].forEach(t=>{
+          const list2=j2.pf[t]||[];
+          if(!list2.length)return;
+          const ids=new Set(list2.map(x=>String(x.id)));
+          const pend2=new Set(OUT.filter(o=>o.e==="pf"&&o.t===t&&o.item).map(o=>String(o.item.id)));
+          (PF[t]||[]).slice().forEach(x=>{const mk="p"+t+"-"+x.id;
+            if(ids.has(String(x.id))||pend2.has(String(x.id))){delete MISS[mk];return;}
+            if(MISS[mk]){toTrash("pf",{t:t,item:x},String(x.name||x.year||"بند شخصي"));
+              PF[t]=PF[t].filter(v=>v.id!==x.id);delete MISS[mk];gone++;}
+            else MISS[mk]=1;});
+        });
+        {const salL=(j2.pf.sal||[]).filter(x=>x.type&&String(x.type).indexOf("حافز")>-1);
+         if(salL.length){
+          const ids3=new Set(salL.map(x=>String(x.id)));
+          const pend3=new Set(OUT.filter(o=>o.e==="ext"&&o.item).map(o=>String(o.item.id)));
+          SAL.extras.slice().forEach(x=>{const mk="x"+x.id;
+            if(ids3.has(String(x.id))||pend3.has(String(x.id))){delete MISS[mk];return;}
+            if(MISS[mk]){toTrash("ext",x,"حافز — "+String(x.label||""));
+              SAL.extras=SAL.extras.filter(v=>v.id!==x.id);delete MISS[mk];gone++;}
+            else MISS[mk]=1;});
+         }}
         savePF();saveSAL();
       }
     }catch(e2){}
+    /* ضربة MISS أولى معلّقة + ردود unchanged كانت بتأجل انتشار الحذف للأبد — نصفّر الختم فالسحبة الجاية تبقى كاملة */
+    if(Object.keys(MISS).length){LASTREV="";try{localStorage.setItem("bg_rev","");}catch(e){}}
     if(auto){ if((added||upd||gone)&&!uiBusy())liveRefresh(); return; }
     go("home");
     toast(added||upd||gone?("جديد "+added+" · محدَّث "+upd+(gone?" · اتشال "+gone:"")):"لا يوجد جديد من المحاسب");
@@ -3299,6 +3411,24 @@ async function cloudRestore(auto){
    نفس البيانات على الموبايل واللاب: الدفع لحظي أصلاً عبر queueOp/syncNow،
    والسحب هنا تلقائي كل دقيقة وعند فتح التطبيق أو الرجوع له أو عودة النت. */
 let PULLING=false,LASTPULL=0;const MISS={};
+let LASTREV="";try{LASTREV=localStorage.getItem("bg_rev")||"";}catch(e){}
+/* تخزين دائم: من غيره المتصفح ممكن يمسح كل البيانات المالية (تنظيف تلقائي أو مسح بيانات تصفح) */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+/* أكتر من تبويب مفتوح (اللاب): إعادة تحميل البيانات لما تبويب تاني يكتبها — بدل الكتابة فوق بعض */
+window.addEventListener("storage",ev=>{
+  try{
+    if(!ev.key)return;
+    if(ev.key==="bg_recs"){DB=JSON.parse(ev.newValue||"[]");}
+    else if(ev.key==="bg_outbox"){OUT=JSON.parse(ev.newValue||"[]");}
+    else if(ev.key==="bg_pf"){const p=JSON.parse(ev.newValue||"null");if(p)PF=p;}
+    else if(ev.key==="bg_sal"){const s=JSON.parse(ev.newValue||"null");if(s)SAL=s;}
+    else if(ev.key==="bg_open"){const o=JSON.parse(ev.newValue||"null");if(o)OPEN=o;}
+    else if(ev.key==="bg_trash"){TRASH=JSON.parse(ev.newValue||"[]");}
+    else if(ev.key==="bg_rev"){LASTREV=ev.newValue||"";return;}
+    else return;
+    if(!uiBusy())liveRefresh();
+  }catch(e){}
+});
 function uiBusy(){ /* بلاش ريفرش والمستخدم بيكتب أو فاتح نافذة */
   try{
     if($("modal").classList.contains("show"))return true;
@@ -3478,8 +3608,13 @@ function pendCount(){return DB.filter(r=>!r.sy).length+OUT.length;}
 function syncBar(){const p=pendCount(),d=$("pill").firstElementChild;
   if(!CFG.url){d.className="dot off";$("pilltx").textContent="محلي";return;}
   if(p){d.className="dot wait";$("pilltx").textContent="بانتظار "+p;}else{d.className="dot";$("pilltx").textContent="متزامن";}}
+let SYNCING=false,SYNCAGAIN=false;
 async function syncNow(alertMe){
   if(!CFG.url){if(alertMe)toast("أدخل رابط المزامنة أولاً",1);return;}
+  /* حارس إعادة دخول: تشغيلان متوازيان كانا بيفقدا أوامر من OUT (shift مزدوج) */
+  if(SYNCING){SYNCAGAIN=true;return;}
+  SYNCING=true;
+  try{
   const pend=DB.filter(r=>!r.sy);
   if(!pend.length&&!OUT.length){if(alertMe)toast("كل العمليات مُرسَلة");syncBar();return;}
   let done=0;const SENT=[];
@@ -3494,19 +3629,24 @@ async function syncNow(alertMe){
     }catch(e){break;}
   }
   while(OUT.length){
+    const op=OUT[0];
     try{
-      const rs2=await fetchT(CFG.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({key:CFG.key||"",who:CFG.name||"المستخدم",op:OUT[0]}),redirect:"follow"},20000);
+      const rs2=await fetchT(CFG.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({key:CFG.key||"",who:CFG.name||"المستخدم",op:op}),redirect:"follow"},20000);
       let ok2=false;try{const j2=await rs2.json();ok2=!!(j2&&j2.ok);}catch(_){ok2=rs2.ok;}
       if(!ok2)break;
-      OUT.shift();saveOUT();done++;
+      const ix=OUT.indexOf(op);if(ix>-1)OUT.splice(ix,1);  /* حذف بالهوية — مش shift أعمى */
+      saveOUT();done++;
     }catch(e){break;}
   }
   save();syncBar();showSet();
   if(SENT.length)verifySync(SENT);
   if(!$("log").classList.contains("hide"))renderLog();
   if(alertMe)toast(done?("تم إرسال "+done+" عملية"):"تعذّر الإرسال — تحقق من الإنترنت",done?0:1);
+  }finally{
+    SYNCING=false;
+    if(SYNCAGAIN){SYNCAGAIN=false;setTimeout(()=>syncNow(false),80);}
+  }
 }
-window.addEventListener("online",()=>syncNow(false));
 window.addEventListener("popstate",()=>{ if($("modal").classList.contains("show")){closeModal();return;} goBack(); });
 try{history.replaceState({s:"reg"},"");}catch(e){}
 $("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
@@ -3557,13 +3697,15 @@ function pinCfg(){try{return JSON.parse(localStorage.getItem("bg_pin")||"null")}
 function lkDots(){const n=LK.buf.length;[...$("lkdots").children].forEach((d,i)=>d.classList.toggle("on",i<n));}
 function lkDel(){LK.buf=LK.buf.slice(0,-1);lkDots();$("lkerr").classList.add("hide");}
 async function lkKey(n){
+  if(LK.lockUntil&&Date.now()<LK.lockUntil){
+    $("lksub").textContent="استنى "+Math.ceil((LK.lockUntil-Date.now())/1000)+" ثانية وحاول تاني";return;}
   if(LK.buf.length>=4)return;
   LK.buf+=n;lkDots();$("lkerr").classList.add("hide");
   if(LK.buf.length<4)return;
   const v=LK.buf;LK.buf="";setTimeout(()=>lkDots(),120);
   const c=pinCfg();
   if(LK.mode==="open"){
-    if(c && await sha(c.salt+v)===c.hash){ $("lock").classList.remove("show"); }
+    if(c && await sha(c.salt+v)===c.hash){ LK.fails=0;LK.wait=0;LK.lockUntil=0;$("lock").classList.remove("show"); }
     else lkFail();
   } else if(LK.mode==="new"){
     LK.tmp=v;LK.mode="confirm";$("lktitle").textContent="أكّد الرقم";$("lksub").textContent="اكتب نفس الأربع أرقام مرة تانية";
@@ -3581,7 +3723,16 @@ async function lkKey(n){
   }
 }
 function lkFail(){const e=$("lkerr");e.classList.remove("hide");
-  if(navigator.vibrate)try{navigator.vibrate(60)}catch(x){}}
+  if(navigator.vibrate)try{navigator.vibrate(60)}catch(x){}
+  /* حد للمحاولات: ٥ غلط ورا بعض = تعطيل ٣٠ ثانية (بتتضاعف) — ٤ أرقام من غير حد بتتخمن براحة */
+  if(LK.mode==="open"||LK.mode==="verify"){
+    LK.fails=(LK.fails||0)+1;
+    if(LK.fails>=5){
+      LK.wait=(LK.wait||15)*2;
+      LK.lockUntil=Date.now()+LK.wait*1000;LK.fails=0;
+      $("lksub").textContent="محاولات كتير غلط — استنى "+LK.wait+" ثانية وحاول تاني";
+    }
+  }}
 function lkPad(on){
   $("pad").classList.toggle("hide",!on);
   $("lkdots").classList.toggle("hide",!on);
@@ -3667,7 +3818,7 @@ if('serviceWorker' in navigator){
       const w=reg.installing; if(!w)return;
       w.addEventListener('statechange',()=>{
         if(w.state==='installed'&&navigator.serviceWorker.controller){
-          toast("فيه إصدار أحدث — افتح الإعدادات واضغط «تحديث التطبيق»");
+          toast("فيه تحديث جديد — اقفل التطبيق وافتحه تاني يوصلك لوحده");
         }
       });
     });
