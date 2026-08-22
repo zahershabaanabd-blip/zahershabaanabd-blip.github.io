@@ -492,7 +492,6 @@ section{animation:fade .25s ease}
      بيحافظ على اندفاع القراءة لتحت: التبويبات ← النموذج ← العمليات.
      الفراغ على الجنبين مقصود — راحة للعين، مش مساحة ضايعة. */
   #reg,#rpt,#acc,#acct,#log,#exp,#set,#trash,#pform,#form{max-width:var(--col);margin-inline:auto}
-  #loghost{margin-top:18px}
   #rptbar{margin-bottom:16px}
   /* اختيار التقرير: التبويبات الثلاثة في صف أفقي فوق التقرير */
   #rptbar .seg{gap:6px}
@@ -1082,7 +1081,7 @@ section{animation:fade .25s ease}
   <button class="btn d" id="mok">تأكيد</button><button class="btn s" onclick="closeModal()">إلغاء</button></div></div>
 <script>
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};   /* يجب أن تسبق أي استخدام — تُستدعى عند أول تشغيل قبل وجود بيانات */
-let KPIH="";   /* بطاقات المؤشرات — تُبنى في renderRpt وتُستخدم في renderCo */
+let KPIH="";   /* بطاقات المؤشرات — تُبنى في renderRpt وتُعرض في «الحركة الشهرية» فقط */
 const TREE={
  in:[
   {c:"IN-SAL",n:"راتب ومستحقات وظيفية",s:["راتب الشهر","جزء من الراتب","متأخرات رواتب","حافز أو مكافأة"]},
@@ -1271,7 +1270,7 @@ function exportXLS(){
   const HD=(b,hs)=>b.add(hs.map(h=>[h,S.hd]),30);
   const SEP=(b,label,n)=>{const r=b.add([[label,S.sep]],26);b.merge(r,n);};
   const R2=v=>typeof v==="number"?Math.round(v*100)/100:v;
-  const TOT=(b,label,n,vals)=>{const c=[[label,S.tot]];for(let i=1;i<n;i++)c.push(vals&&vals[i]!==undefined?[R2(vals[i]),S.totm]:["",S.tot]);b.add(c,20);};
+  const TOT=TOTX; /* مصدر واحد لصف الإجمالي */
   /* ١) كشف العمليات */
   const H1=["م","التاريخ","النوع","البند","النوع الفرعي","الكود","المُسلِّم","البيان","المبلغ","العملة","سعر الصرف","المقابل بالدولار","إيصال"];
   const b1=XSheetBuilder([6,11,12,20,20,10,18,26,13,11,11,14,8]);
@@ -1491,6 +1490,7 @@ function exportXLS(){
 
 let WHO=[];try{WHO=JSON.parse(localStorage.getItem("bg_who")||"[]")}catch(e){}
 const CSY={"دولار":"$","ليرة تركية":"₺","ريال سعودي":"ر.س","جنيه مصري":"ج.م","يورو":"€"};
+const arNum=v=>String(v==null?"":v).replace(/[٠-٩]/g,c=>"٠١٢٣٤٥٦٧٨٩".indexOf(c)); /* توحيد الأرقام العربية — مصدر واحد */
 const MON=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 const ICO={in:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>',
 co:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 9l2-4h14l2 4M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9"/></svg>',
@@ -1516,7 +1516,7 @@ let DB=JSON.parse(localStorage.getItem("bg_recs")||"[]");
 let CFG=JSON.parse(localStorage.getItem("bg_cfg")||"{}");
 if(PRESET_URL&&!CFG.url){CFG.url=PRESET_URL;localStorage.setItem("bg_cfg",JSON.stringify(CFG));}
 let kind="in",img=null,cat="",sub="",filt="all",rptYear="all",lsort="d";
-const APPVER="13.40";
+const APPVER="13.50";
 /* آيفون/آيباد/سفاري — سلوك الطباعة والتنزيل مختلف ولازم مسار خاص */
 const IOSLIKE=(function(){try{
   const ua=navigator.userAgent||"";
@@ -1538,26 +1538,17 @@ function dropOldImages(){ // يشيل صور العمليات اللي اتبع�
   [...DB].sort((a,b)=>a.id-b.id).forEach(r=>{ if(r.sy&&r.img){r.img="";r.imgf=1;n++;} });
   return n;
 }
-function save(){
-  try{ localStorage.setItem("bg_recs",JSON.stringify(DB)); try{IDB.set("bg_recs",localStorage.getItem("bg_recs"));}catch(_m){} return true; }
-  catch(e){
-    const n=dropOldImages();
-    try{ localStorage.setItem("bg_recs",JSON.stringify(DB));
-      try{IDB.set("bg_recs",localStorage.getItem("bg_recs"));}catch(_m){}
-      if(n)toast("المساحة امتلت — اتشالت "+n+" صورة إيصال متخزّنة عند المحاسب",1);
-      return true;
-    }catch(e2){
-      toast("مساحة الجهاز امتلت — احفظ نسخة احتياطية وامسح إيصالات قديمة",1);
-      return false;
-    }
-  }
-}
+function save(){ return safeSet("bg_recs",JSON.stringify(DB)); } /* مصدر واحد لمعالجة امتلاء المساحة */
 /* كتابة آمنة: امتلاء المساحة كان بيرمي استثناء يقطع الحذف/الطابور نص السكة — نشيل صور قديمة ونعيد المحاولة */
 function safeSet(k,v){
   try{ localStorage.setItem(k,v); try{IDB.set(k,v);}catch(_m){} return true; }
   catch(e){
-    try{ dropOldImages(); localStorage.setItem("bg_recs",JSON.stringify(DB)); }catch(_){}
-    try{ localStorage.setItem(k,v); try{IDB.set(k,v);}catch(_m){} return true; }
+    let n=0;
+    try{ n=dropOldImages(); localStorage.setItem("bg_recs",JSON.stringify(DB)); }catch(_){}
+    if(k==="bg_recs")v=JSON.stringify(DB);  /* بعد إسقاط الصور لازم النسخة الطازة */
+    try{ localStorage.setItem(k,v); try{IDB.set(k,v);}catch(_m){}
+      if(n)toast("المساحة امتلت — اتشالت "+n+" صورة إيصال متخزّنة عند المحاسب",1);
+      return true; }
     catch(e2){ toast("مساحة الجهاز امتلت — احفظ نسخة احتياطية وامسح إيصالات قديمة",1); return false; }
   }
 }
@@ -1632,7 +1623,7 @@ function salCalc(){
                         والعهدة تحت الحساب (IN-CST) — فلوس الشركة معه، تُعرض منفصلة. */
 const CLAIM_DED=["IN-DUE","IN-REF","IN-ADV"];
 function claimCalc(){
-  let sp=0,pay=0,un=0,cust=0,over=0;const per={};
+  let sp=0,pay=0,un=0,cust=0,over=0;const per={},extras=[];
   /* ترتيب زمني: العهدة تُخصم مما استُلم فعلاً، والزائد يتحول لمطالبة على الشركة */
   [...DB].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||a.id-b.id).forEach(r=>{
     const u=(typeof r.usd==="number")?r.usd:(r.cur==="دولار"?r.amt:null);
@@ -1644,7 +1635,7 @@ function claimCalc(){
           const fromCust=Math.min(u,Math.max(0,cust));
           cust-=fromCust;
           const extra=Math.round((u-fromCust)*100)/100;
-          if(extra>0){sp+=extra;over+=extra;}   /* الزائد عن العهدة = دفعه من ماله */
+          if(extra>0){sp+=extra;over+=extra;extras.push({r:r,extra:extra});}   /* الزائد عن العهدة = دفعه من ماله */
         }
       }
       else if(u==null){un++;per[r.cur]=(per[r.cur]||0)+(r.ref?-r.amt:r.amt);}
@@ -1657,7 +1648,7 @@ function claimCalc(){
     }
   });
   sp=Math.round(sp*100)/100;pay=Math.round(pay*100)/100;cust=Math.round(cust*100)/100;over=Math.round(over*100)/100;
-  return {open:OPEN.claim,sp,pay,cust,over,bal:Math.round((OPEN.claim+sp-pay)*100)/100,un,per};
+  return {open:OPEN.claim,sp,pay,cust,over,bal:Math.round((OPEN.claim+sp-pay)*100)/100,un,per,extras};
 }
 function renderCo2(){
   const c=claimCalc();
@@ -2038,22 +2029,7 @@ function desAr(t){const x=String(t||"");
 function desFull(t){const a=desAr(t);const x=String(t||"").trim();
   return a?(a+" — "+x):x;}
 function dmy(d){const p=String(d||"").split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:(d||"");}
-function custExtras(){ /* إعادة تشغيل زمني: الزائد المدفوع من ماله فوق رصيد العهدة — نفس منطق claimCalc بالظبط */
-  let cust=0;const ex=[];
-  [...DB].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||a.id-b.id).forEach(r=>{
-    const u=(typeof r.usd==="number")?r.usd:(r.cur==="دولار"?r.amt:null);
-    if(r.k==="in"&&!r.ref&&r.cat==="IN-CST"){if(u!=null)cust+=u;}
-    else if(r.k==="co"&&r.src==="cust"&&u!=null){
-      if(r.ref){cust+=u;}
-      else{
-        const fromCust=Math.min(u,Math.max(0,cust));cust-=fromCust;
-        const extra=Math.round((u-fromCust)*100)/100;
-        if(extra>0)ex.push({r:r,extra:extra});
-      }
-    }
-  });
-  return ex;
-}
+function custExtras(){ return claimCalc().extras; } /* مصدر واحد: منطق العهدة كله جوّه claimCalc */
 function claimPre(){ /* صافي حركة المطالبة للعمليات خارج فترة الفلتر — سطر «رصيد ما قبل الفترة» في الكشف */
   const F=new Set(rptFilter().map(r=>r.id));
   let sp=0,pay=0;
@@ -2225,7 +2201,7 @@ function TOTX(b,label,n,vals){const c=[[label,S.tot]];
 function acctFxTgl(){const f=$("acfx"),b=$("acfxbtn");if(!f)return;
   const op=f.classList.toggle("hide");if(b)b.classList.toggle("open",!op);
   if(op){$("ac_orig").value="";$("ac_fx").value="";$("ac_fxout").textContent="";}}
-function acctNum(el){const v=String(($(el)||{}).value||"").replace(/[٠-٩]/g,c=>"٠١٢٣٤٥٦٧٨٩".indexOf(c)).replace(/[^0-9.]/g,"");
+function acctNum(el){const v=arNum(($(el)||{}).value).replace(/[^0-9.]/g,"");
   return parseFloat(v)||0;}
 function acctFxCalc(){
   const o=acctNum("ac_orig"), r=acctNum("ac_fx"), x=acctItem();
@@ -2259,7 +2235,7 @@ function acctCancel(){const f=$("acform");if(f)f.classList.add("hide");ACT.ix=-1
 function acctSave(){saveRecLine();}
 function saveRecLine(){
   const x=acctItem();if(!x)return;
-  const v=parseFloat(String($("ac_v").value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+  const v=parseFloat(arNum($("ac_v").value));
   const des=$("ac_s").value.trim(), d=$("ac_d").value||today();
   if(!des){toast("اكتب بيان الحركة",1);return;}
   /* الأرقام والعملات مكانها الأعمدة مش البيان — تنبيه لمرة واحدة */
@@ -2409,7 +2385,6 @@ function go(s,isBack){
   $("logo").style.display = deep?"none":"grid";
   try{ if(!isBack) history.pushState({s},""); }catch(e){}
   ["home","reg","form","log","rpt","exp","set","co2","pf","gr2","pform","trash","acc","acct"].forEach(x=>{const el=$(x);if(el&&el.parentNode&&el.parentNode.id!=="reghost"&&el.parentNode.id!=="acchost")el.classList.add("hide");else if(el&&(x==="co2"||x==="pf"||x==="gr2"||x==="form"))el.classList.add("hide");});
-  {const lg=$("log");if(lg&&lg.parentNode&&lg.parentNode.id==="loghost")lg.classList.add("hide");}
   $(s).classList.remove("hide");
   ["acc","reg","log","rpt"].forEach(x=>{const b=$("n_"+x);if(b)b.classList.toggle("on",x===s||(x==="reg"&&s==="form")||(x==="acc"&&(s==="pform"||s==="acct"))); });
   try{ if(["reg","rpt","acc","log","exp","set","trash"].includes(s)) localStorage.setItem("bg_scr",s);
@@ -2457,7 +2432,7 @@ function openForm(k,eid){
   $("catchips2").innerHTML=TREE[k].map(c=>`<span class="chip" data-c="${c.c}" onclick="pickCat2(this)">${esc(c.n)}</span>`).join("");
   $("subwrap2").classList.add("hide");
   $("catlbl").textContent=k==="in"?"نوع المبلغ المستلَم":k==="co"?"نوع المصروف عن الشركة":"نوع المصروف الشخصي";
-  {const CURS=["دولار","ليرة تركية","ريال سعودي","جنيه مصري","يورو"];
+  {const CURS=Object.keys(CSY);
    let last="دولار";try{last=localStorage.getItem("bg_lastcur")||"دولار";}catch(e){}
    $("f_cur").value=last;
    $("curchips").innerHTML=CURS.map(c=>`<span class="chip ${c===last?"on":""}" data-c="${c}" onclick="pickCur(this)">${c}</span>`).join("");}
@@ -2512,7 +2487,7 @@ $("f_cur").addEventListener("change",()=>{$("f_fx").value="";$("fxinfo").textCon
 ["f_amt","f_fx","sa_amt","ex_amt","p_amt","p_paid","min"].forEach(id=>{
   const el=$(id); if(!el)return;
   el.addEventListener("input",()=>{
-    let v=el.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))
+    let v=arNum(el.value)
                   .replace(/[^0-9.]/g,"")
                   .replace(/(\..*)\./g,"$1");
     if(v!==el.value)el.value=v;
@@ -2831,10 +2806,10 @@ function rptFilterPrev(){ /* الفترة المكافئة السابقة */
     return DB.filter(r=>r.date.slice(0,4)===py);}
   return [];
 }
-function kpiGo(k){ filt=k; go('reg'); setTimeout(()=>{try{renderLog();
+function kpiGo(k){ filt=k; go('log'); setTimeout(()=>{try{renderLog();
   const b=document.querySelector('#seg button[onclick*="'+k+'"]');
   if(b){document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
-  const lh=$("loghost");if(lh)lh.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}},250);}
+}catch(e){}},250);}
 function rptFilter(){
   const now=new Date(), mk=today().slice(0,7);
   let L;
@@ -3078,7 +3053,6 @@ function renderCo(){
     }).join("");
   };
   let h=`<div class="kv" style="border-bottom:0;padding-top:0"><span class="mini">الفترة: ${esc(perFull())}</span><span></span></div>`;
-  h+=KPIH;
   h+=`<div class="hsec co" style="margin-top:2px">أولاً: الحساب الجاري</div>`;
   h+=`<div class="kv"><span>الرصيد الافتتاحي <span class="mini">${OPEN.date}</span></span><b class="num">${fmt(c.open)} $</b></div>`;
   h+=`<div class="kv"><span>مصروفات مسجَّلة عبر التطبيق</span><b class="num">${fmt(c.sp)} $</b></div>`;
@@ -3222,13 +3196,7 @@ function renderPos(){
       <span class="gn">حاسبة الزكاة<i>الوعاء × ٢٫٥٪ — اقتراح للمراجعة مع المحاسب</i></span>
       <span class="chev">‹</span></div>
     <div class="gb">${zakCalcHTML()}</div></div>`;
-  h+=`<div class="chips noprint" style="margin-top:12px">
-    <span class="chip" onclick="openPf('as')">+ أصل / ممتلك</span>
-    <span class="chip" onclick="openPf('dbt')">+ دين عليك</span>
-    <span class="chip" onclick="openPf('due')">+ مستحق لك</span>
-    <span class="chip" onclick="openPf('gr')">+ ضمان أدبي</span>
-    <span class="chip" onclick="openPf('zak')">+ زكاة سنة</span>
-  </div>`;
+  h+=`<p class="note noprint" style="margin-top:12px">الإضافة من تبويب <a class="lnk" onclick="go('reg')">«تسجيل»</a> ← «إضافة بند للحسابات»، والتعديل بالضغط على أي بند فوق.</p>`;
   $("rpos").innerHTML=h;
 }
 function renderGrRpt(){
@@ -3249,7 +3217,7 @@ function renderRpt(){
   {const yw=$("ryearw"),cw=$("rcustom");
    if(yw)yw.classList.toggle("hide",rptPer!=="y");
    if(cw)cw.classList.toggle("hide",rptPer!=="c");}
-  {const base=["دولار","ليرة تركية","ريال سعودي","جنيه مصري","يورو"];
+  {const base=Object.keys(CSY);
    const used=new Set(DB.map(r=>r.cur));
    ["cash","as","dbt","due","gr","zak"].forEach(t=>(PF[t]||[]).forEach(x=>{if(x.cur)used.add(x.cur);}));
    if(SAL.cur)used.add(SAL.cur);
@@ -3290,14 +3258,14 @@ function renderRpt(){
             o:L.filter(r=>r.k==="out").reduce((a,r)=>a+r.amt,0)};});
   const mMax=Math.max(...mData.map(x=>Math.max(x.i,x.c,x.o)),1);
   $("rchartcur").textContent="آخر ٦ شهور — "+mainCur;
-  $("rchart").innerHTML=mData.some(x=>x.i||x.c||x.o)?
+  $("rchart").innerHTML=KPIH+(mData.some(x=>x.i||x.c||x.o)?
     `<div class="mchart">`+mData.map(x=>`<div class="mcol"><div class="mbars">
       <i class="b1" style="height:${Math.max(2,Math.round(x.i/mMax*100))}px"></i>
       <i class="b2" style="height:${Math.max(2,Math.round(x.c/mMax*100))}px"></i>
       <i class="b3" style="height:${Math.max(2,Math.round(x.o/mMax*100))}px"></i>
     </div><span class="mlab">${MON[+x.mk.slice(5,7)-1].slice(0,5)}</span></div>`).join("")+`</div>
     <div class="leg"><span><i style="background:var(--in)"></i>المستلَم</span><span><i style="background:var(--co)"></i>عن الشركة</span><span><i style="background:var(--out)"></i>شخصي</span></div>`
-    :`<div class="note">لا توجد حركة في آخر ٦ شهور</div>`;
+    :`<div class="note">لا توجد حركة في آخر ٦ شهور</div>`);
 }
 function setYear(v){rptYear=v;renderRpt();}
 async function verifySync(ids){ // طبقة تأكيد ثانية فوق إيصال السيرفر — نتحقق من اللي اتبعت حالاً فقط
@@ -3675,30 +3643,29 @@ function daysSince(ds){ if(!ds)return null;
   const a=new Date(ds+"T00:00:00"),b=new Date(today()+"T00:00:00");
   return Math.max(0,Math.round((b-a)/86400000));
 }
+function bkState(){ /* مصدر واحد لحالة النسخة الاحتياطية */
+  let last=null;try{last=localStorage.getItem("bg_lastbk");}catch(e){}
+  const days=daysSince(last);
+  const hasData=DB.length||["cash","as","dbt","due","gr","zak"].some(t=>(PF[t]||[]).length);
+  return {last,days,hasData,due:hasData&&(days===null||days>=30)};
+}
 function bkChk2(){
-  let lb=null;try{lb=localStorage.getItem("bg_lastbk");}catch(e){}
-  const nd=daysSince(lb), hasData=DB.length||["cash","as","dbt","due","gr","zak"].some(t=>(PF[t]||[]).length);
-  const hb=$("rbk");
-  if(hb){const due=hasData&&(nd===null||nd>=30);
-    hb.classList.toggle("hide",!due);
-    if(due)hb.innerHTML=`<span>${nd===null?"لم تُحفظ نسخة احتياطية بعد":"آخر نسخة احتياطية من "+nd+" يوماً"}</span><button onclick="go('exp')">حفظ نسخة</button>`;}
+  const st=bkState(), hb=$("rbk");
+  if(hb){hb.classList.toggle("hide",!st.due);
+    if(st.due)hb.innerHTML=`<span>${st.days===null?"لم تُحفظ نسخة احتياطية بعد":"آخر نسخة احتياطية من "+st.days+" يوماً"}</span><button onclick="go('exp')">حفظ نسخة</button>`;}
   const fr=$("rfr");
-  if(fr){const fresh=!DB.length&&!CFG.url&&!["cash","as","dbt","due","gr","zak"].some(t=>(PF[t]||[]).length);
+  if(fr){const fresh=!DB.length&&!CFG.url&&!st.hasData;
     fr.classList.toggle("hide",!fresh);}
 }
 function bkChk(){
   try{abStatus();}catch(e){}
-  let last=null;try{last=localStorage.getItem("bg_lastbk");}catch(e){}
-  const n=daysSince(last);
-  const el=$("bkwarn"); if(!el)return;
-  const has=DB.length||["cash","as","dbt","due","gr","zak"].some(t=>(PF[t]||[]).length);
-  if(!has){el.classList.add("hide");return;}
-  if(n===null){el.classList.remove("hide");el.className="bkw warn";
-    el.innerHTML=`<span>لم تُحفظ نسخة احتياطية بعد</span><button onclick="backup()">حفظ الآن</button>`;return;}
-  if(n>=30){el.classList.remove("hide");el.className="bkw warn";
-    el.innerHTML=`<span>آخر نسخة احتياطية من <b class="num">${n}</b> يوماً</span><button onclick="backup()">حفظ الآن</button>`;return;}
-  el.classList.remove("hide");el.className="bkw ok";
-  el.innerHTML=`<span>آخر نسخة احتياطية: ${last}${n?` — منذ <b class="num">${n}</b> يوماً`:" (اليوم)"}</span>`;
+  const st=bkState(), el=$("bkwarn"); if(!el)return;
+  if(!st.hasData){el.classList.add("hide");return;}
+  el.classList.remove("hide");
+  if(st.days===null){el.className="bkw warn";el.innerHTML=`<span>لم تُحفظ نسخة احتياطية بعد</span><button onclick="backup()">حفظ الآن</button>`;return;}
+  if(st.days>=30){el.className="bkw warn";el.innerHTML=`<span>آخر نسخة احتياطية من <b class="num">${st.days}</b> يوماً</span><button onclick="backup()">حفظ الآن</button>`;return;}
+  el.className="bkw ok";
+  el.innerHTML=`<span>آخر نسخة احتياطية: ${st.last}${st.days?` — منذ <b class="num">${st.days}</b> يوماً`:" (اليوم)"}</span>`;
 }
 function pendCount(){return DB.filter(r=>!r.sy).length+OUT.length;}
 function syncBar(){const p=pendCount(),d=$("pill").firstElementChild;
