@@ -703,6 +703,7 @@ section{animation:fade .25s ease}
       <span>تصفية <i id="rfsum">كل الفترات · كل العملات</i></span>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
     <div id="rfilters" class="hide" style="margin-top:8px">
+      <div id="rfper">
       <label style="margin-top:0">الفترة</label>
       <div class="seg" id="rseg">
         <button id="rp_m" onclick="setRpt('m')">هذا الشهر</button>
@@ -720,6 +721,7 @@ section{animation:fade .25s ease}
           <div><label style="margin-top:0">إلى تاريخ</label><input type="date" id="rd2" onchange="setRptDate()"></div>
         </div>
       </div>
+      </div>
       <label style="margin-top:12px">العملة</label>
       <select id="rcurf" onchange="setRptCur(this.value)"></select>
     </div>
@@ -733,11 +735,11 @@ section{animation:fade .25s ease}
     <div id="rco"></div>
   </div>
   <div class="card vcard hide" data-v="rpos">
-    <div class="ch"><h3>المركز المالي</h3></div>
+    <div class="ch"><h3>المركز المالي</h3><span class="mini">الأرصدة كما هي اليوم</span></div>
     <div id="rpos"></div>
   </div>
   <div class="card vcard hide" data-v="rgr">
-    <div class="ch"><h3>بيان الضمانات الأدبية</h3></div>
+    <div class="ch"><h3>بيان الضمانات الأدبية</h3><span class="mini">كل الضمانات القائمة — لا تتأثر بالتصفية</span></div>
     <div id="rgr"></div>
   </div>
   <!-- كل الطباعة والتصدير في مكان واحد -->
@@ -1274,7 +1276,7 @@ function exportXLS(){
   /* ١) كشف العمليات */
   const H1=["م","التاريخ","النوع","البند","النوع الفرعي","الكود","المُسلِّم","البيان","المبلغ","العملة","سعر الصرف","المقابل بالدولار","إيصال"];
   const b1=XSheetBuilder([6,11,12,20,20,10,18,26,13,11,11,14,8]);
-  T(b1,H1.length,"كشف العمليات","المُعد: "+per+"   |   الفترة: "+rng+"   |   تاريخ الطباعة: "+today());HD(b1,H1);
+  T(b1,H1.length,"كشف العمليات","المُعد: "+per+"   |   نطاق السجل: "+rng+"   |   تاريخ الطباعة: "+today());HD(b1,H1);
   let lastM="",i=1,ms=0,mu=0,mc=new Set();
   const MTOT=(lbl)=>TOT(b1,lbl,H1.length,{8:(mc.size===1?ms:"—"),11:mu}); /* لا يُجمَع مبلغ خام من عملات مختلفة */
   all.forEach(r=>{const m=r.date.slice(0,7);
@@ -1330,7 +1332,7 @@ function exportXLS(){
   /* ٤) الملخص */
   const H4=["م","العملة","المستلَم","مدفوع عن الشركة","مصروف شخصي","الصافي","عدد العمليات"];
   const b4=XSheetBuilder([6,16,15,20,15,15,13]);
-  T(b4,H4.length,"الملخص","سجل حساباتي   |   المُعد: "+per+"   |   الفترة: "+rng);HD(b4,H4);
+  T(b4,H4.length,"الملخص","سجل حساباتي   |   المُعد: "+per+"   |   نطاق السجل: "+rng);HD(b4,H4);
   let m=1;
   CU.forEach(cu=>{const f=all.filter(r=>r.cur===cu);
     /* العُهد المستلمة (IN-CST) فلوس الشركة مش دخل شخصي — استبعادها من المستلَم والصافي */
@@ -1425,8 +1427,8 @@ function exportXLS(){
   /* ٩) تقرير الشركة */
   const H9=["البند","العملة","القيمة","عدد العمليات"];
   const b9=XSheetBuilder([40,13,18,13]);
-  T(b9,4,"تقرير الشركة","المُعد: "+per+"   |   الفترة: "+perFull()+"   |   تاريخ الطباعة: "+today());HD(b9,H9);
-  {const D=coData(), cc9=D.c, sc9=D.sc;
+  T(b9,4,"تقرير الشركة","المُعد: "+per+"   |   كامل السجل   |   تاريخ الطباعة: "+today());HD(b9,H9);
+  {const D=coData(true), cc9=D.c, sc9=D.sc;
    SEP(b9,"الحساب الجاري — بالدولار",4);
    b9.add([["الرصيد الافتتاحي ("+OPEN.date+")",S.tx],["دولار",S.ct],[R2(cc9.open),S.mn],["",S.ct]],28);
    b9.add([["مصروفات مسجَّلة عبر التطبيق",S.tx],["دولار",S.ct],[R2(cc9.sp),S.mn],["",S.ct]],28);
@@ -1447,8 +1449,6 @@ function exportXLS(){
    blk9("عُهد مستلمة",D.CR);
    blk9("مصروف من العهدة",D.CS);
    if(D.CR.length||D.CS.length)TOT(b9,"رصيد العهدة غير المسوَّى",4,{2:cc9.cust});
-   if((PF.gr||[]).length){SEP(b9,"الضمانات — دين على الشركة بضمانه الأدبي (غير محتسب)",4);
-     PF.gr.forEach(x=>b9.add([[x.name,S.txw],[x.cur||"دولار",S.ct],[x.amt?R2(+x.amt):"",x.amt?S.mn:S.ct],["",S.ct]],28));}
   }
   /* ١٠) قائمة المركز المالي الشخصي */
   const H10=["البند","العملة","القيمة"];
@@ -1516,7 +1516,7 @@ let DB=JSON.parse(localStorage.getItem("bg_recs")||"[]");
 let CFG=JSON.parse(localStorage.getItem("bg_cfg")||"{}");
 if(PRESET_URL&&!CFG.url){CFG.url=PRESET_URL;localStorage.setItem("bg_cfg",JSON.stringify(CFG));}
 let kind="in",img=null,cat="",sub="",filt="all",rptYear="all",lsort="d";
-const APPVER="13.50";
+const APPVER="13.60";
 /* آيفون/آيباد/سفاري — سلوك الطباعة والتنزيل مختلف ولازم مسار خاص */
 const IOSLIKE=(function(){try{
   const ua=navigator.userAgent||"";
@@ -1926,9 +1926,12 @@ function acctSetQ(v){ACT.f=Object.assign({},ACT.f,{q:v});renderAcct();}
 function acctClearF(){ACT.f={y:"all",d1:"",d2:"",q:""};
   const a=$("ac_q"),b=$("ac_d1"),c=$("ac_d2");if(a)a.value="";if(b)b.value="";if(c)c.value="";renderAcct();}
 function acctFTxt(){const F=ACT.f||{};
-  if(F.d1||F.d2)return "من "+(F.d1||"البداية")+" إلى "+(F.d2||"النهاية");
-  if(F.y&&F.y!=="all")return "سنة "+F.y;
-  return "كل الحركات";}
+  let t;
+  if(F.d1||F.d2)t="من "+(F.d1||"البداية")+" إلى "+(F.d2||"النهاية");
+  else if(F.y&&F.y!=="all")t="سنة "+F.y;
+  else t="كل الحركات";
+  if(F.q)t+=" · بحث: "+F.q;  /* الكشف المطبوع كان بيقول «كل الحركات» وهو مفلتر بالبحث */
+  return t;}
 function acctFTgl(){const f=$("acfilters"),b=$("acfbtn");if(!f)return;
   const op=f.classList.toggle("hide");if(b)b.classList.toggle("open",!op);}
 function renderAcct(){
@@ -2013,7 +2016,7 @@ function clmSet(k,v){CLM[k]=v;try{localStorage.setItem("bg_clm",JSON.stringify(C
   try{clmOpts();const cs=$("clmsum");if(cs)cs.textContent=clmTxt();}catch(e){}
   renderRpt();}
 function clmTxt(){return (CLM.st==="ok"?"المعتمد فقط":CLM.st==="wt"?"المنتظر فقط":"كل البنود")+
-  (CLM.sal?" · مع الراتب":"")+(rptPer!=="y"||rptYear!=="all"||rptD1||rptD2?" · "+perFull():"");}
+  (CLM.sal?" · مع الراتب":"")+(rptPer!=="y"||rptYear!=="all"||rptD1||rptD2?" · "+perLabel():"");}
 /* dd/mm/yyyy للمستندات الرسمية */
 /* وصف عربي مشتق من اسم الجهة كما ورد بالبنك — الاسم الأصلي يبقى كإثبات */
 function desAr(t){const x=String(t||"");
@@ -2031,7 +2034,7 @@ function desFull(t){const a=desAr(t);const x=String(t||"").trim();
 function dmy(d){const p=String(d||"").split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:(d||"");}
 function custExtras(){ return claimCalc().extras; } /* مصدر واحد: منطق العهدة كله جوّه claimCalc */
 function claimPre(){ /* صافي حركة المطالبة للعمليات خارج فترة الفلتر — سطر «رصيد ما قبل الفترة» في الكشف */
-  const F=new Set(rptFilter().map(r=>r.id));
+  const F=new Set(perFilter().map(r=>r.id));
   let sp=0,pay=0;
   custExtras().forEach(e=>{if(!F.has(e.r.id))sp+=e.extra;});
   DB.forEach(r=>{
@@ -2055,7 +2058,7 @@ function claimRows(){
       n:"",st:b.st||"",sum:1});
   });
   /* ٢) مصروفات مسجَّلة عبر التطبيق (من ماله، غير العهدة) */
-  (CLM.st==="ok"?[]:rptFilter()).filter(r=>r.k==="co"&&r.src!=="cust"&&!r.ref)
+  (CLM.st==="ok"?[]:perFilter()).filter(r=>r.k==="co"&&r.src!=="cust"&&!r.ref)
     .sort((a,c)=>String(a.date).localeCompare(String(c.date)))
     .forEach(r=>{const u=(typeof r.usd==="number")?r.usd:(r.cur==="دولار"?r.amt:null);
       R.push({g:"مصروفات مستجدة",d:r.date,s:catName(r.cat)+(r.sub?" — "+r.sub:"")+(r.des?" — "+r.des:""),
@@ -2063,7 +2066,7 @@ function claimRows(){
         usd:(u==null?0:u),n:(u==null?"بانتظار سعر الصرف":((r.img||r.imgf)?"إيصال مرفق":"")),st:"قيد المراجعة"});});
   /* ٣) الزائد المدفوع من ماله فوق رصيد العهدة — جزء من رصيد المطالبة، كان غايب عن الكشف المطبوع */
   if(CLM.st!=="ok"){
-    const F=new Set(rptFilter().map(r=>r.id));
+    const F=new Set(perFilter().map(r=>r.id));
     custExtras().filter(e=>F.has(e.r.id)).forEach(e=>{
       R.push({g:"مدفوع من ماله زيادة عن رصيد العهدة",d:e.r.date,
         s:catName(e.r.cat)+(e.r.sub?" — "+e.r.sub:"")+(e.r.des?" — "+e.r.des:""),
@@ -2074,7 +2077,7 @@ function claimRows(){
 }
 function claimPaid(){
   /* ردّ مصروف العهدة بيرجع لرصيد العهدة (معالجة موحّدة مع claimCalc) — مش ضمن المسدَّد من الشركة */
-  return rptFilter().filter(r=>(r.k==="in"&&!r.ref&&CLAIM_DED.includes(r.cat))||(r.k==="co"&&r.ref&&r.src!=="cust"))
+  return perFilter().filter(r=>(r.k==="in"&&!r.ref&&CLAIM_DED.includes(r.cat))||(r.k==="co"&&r.ref&&r.src!=="cust"))
     .sort((a,c)=>String(a.date).localeCompare(String(c.date)))
     .map(r=>({d:r.date,s:(r.k==="co"?"ردّ مصروف — ":"")+catName(r.cat)+(r.des?" — "+r.des:""),who:r.who||"",
       orig:(r.cur!=="دولار"?r.amt:""),ocur:(r.cur!=="دولار"?r.cur:""),fx:r.fx||"",
@@ -2090,22 +2093,25 @@ function claimXLS(){
   /* ورقة ١: الملخص */
   const b1=XSheetBuilder([40,20,18,34]);
   b1.add([["تقرير المطالبة",S.ttl]],26);b1.merge(1,4);
-  b1.add([["مُقدِّم المطالبة: "+per+"   ·   بتاريخ "+dmy(today())+"   ·   جميع القيم بالدولار الأمريكي",S.sub]],18);b1.merge(2,4);
+  b1.add([["مُقدِّم المطالبة: "+per+"   ·   بتاريخ "+dmy(today())+"   ·   "+clmTxt()+"   ·   جميع القيم بالدولار الأمريكي",S.sub]],18);b1.merge(2,4);
   b1.add([""],8);
   b1.add([["البند",S.hd],["عدد البنود",S.hd],["القيمة بالدولار",S.hd],["ملاحظات",S.hd]],30);
   {const G={};R.forEach(r=>{G[r.g]=G[r.g]||{n:0,v:0,st:r.st};G[r.g].n++;G[r.g].v+=r.usd;});
    b1.add([["أولاً: مصروفات ومستحقات على الشركة",S.sep],["",S.sep],["",S.sep],["",S.sep]],26);
    Object.entries(G).forEach(([k,v])=>b1.add([[k,S.txw],[v.n,S.nu],[R2(v.v),S.mn],[v.st||"",S.txw]],28));
    TOTX(b1,"إجمالي المطالبة",4,{2:R.reduce((a,r)=>a+r.usd,0)});
-   if(P.length){
+   if(P.length&&CLM.st==="all"){
      b1.add([["ثانياً: المسدَّد من الشركة",S.sep],["",S.sep],["",S.sep],["",S.sep]],26);
      b1.add([["دفعات وردّ مصروفات",S.txw],[P.length,S.nu],[R2(P.reduce((a,r)=>a+r.usd,0)),S.mn],["",S.tx]],28);
      TOTX(b1,"إجمالي المسدَّد",4,{2:P.reduce((a,r)=>a+r.usd,0)});
    }
    b1.add([["",S.tx],["",S.tx],["",S.tx],["",S.tx]],10);
-   {const pre=claimPre();
+   if(CLM.st==="all"){const pre=claimPre();
     if(pre)b1.add([["+ صافي حركة ما قبل الفترة المعروضة",S.txw],["",S.ct],[R2(pre),S.mn],["",S.tx]],28);
     TOTX(b1,"رصيد المطالبة",4,{2:(R.reduce((a,r)=>a+r.usd,0)+pre-P.reduce((a,r)=>a+r.usd,0))});}
+   else{ /* عرض جزئي حسب الحالة — الرصيد الكامل من المحرك */
+    TOTX(b1,"إجمالي البنود المعروضة ("+(CLM.st==="ok"?"المعتمد فقط":"قيد المراجعة فقط")+")",4,{2:R.reduce((a,r)=>a+r.usd,0)});
+    TOTX(b1,"رصيد المطالبة الكامل (كل البنود)",4,{2:claimCalc().bal});}
    /* الملاحظات بعد الرصيد — مش وسط الحساب */
    {const w=R.filter(r=>r.n&&r.n.indexOf("بانتظار سعر الصرف")>-1);
     if(w.length){
@@ -2178,10 +2184,17 @@ function claimPrint(){
       `<td>${esc(desFull(r.s))}${r.n?` <span style="color:#8A97A4">· ${esc(r.n)}</span>`:""}</td>`+
       `<td class="c">${r.orig?fmt(r.orig):""}</td><td class="c">${esc(r.ocur||"")}</td>`+
       `<td class="c">${r.fx?fmt(r.fx):""}</td><td class="n">${r.usd?fmt(r.usd):"—"}</td></tr>`;});
-  ROWS+=`<tr class="tot"><td colspan="6">إجمالي المطالبة</td><td class="n">${fmt(R.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
-  if(pre)ROWS+=`<tr class="tot"><td colspan="6">+ صافي حركة ما قبل الفترة المعروضة</td><td class="n">${fmt(pre)}</td></tr>`;
-  if(P.length)ROWS+=`<tr class="tot"><td colspan="6">− المسدَّد من الشركة (${P.length})</td><td class="n">${fmt(P.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
-  ROWS+=`<tr class="net"><td colspan="6">${bal>=0?"رصيد المطالبة":"مستحق للشركة (الرصيد سالب)"}</td><td class="n ${bal>=0?"p":"m"}">${fmt(bal)} $</td></tr>`;
+  if(CLM.st==="all"){
+    ROWS+=`<tr class="tot"><td colspan="6">إجمالي المطالبة</td><td class="n">${fmt(R.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
+    if(pre)ROWS+=`<tr class="tot"><td colspan="6">+ صافي حركة ما قبل الفترة المعروضة</td><td class="n">${fmt(pre)}</td></tr>`;
+    if(P.length)ROWS+=`<tr class="tot"><td colspan="6">− المسدَّد من الشركة (${P.length})</td><td class="n">${fmt(P.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
+    ROWS+=`<tr class="net"><td colspan="6">${bal>=0?"رصيد المطالبة":"مستحق للشركة (الرصيد سالب)"}</td><td class="n ${bal>=0?"p":"m"}">${fmt(bal)} $</td></tr>`;
+  }else{
+    /* عرض جزئي حسب الحالة: الرصيد الكامل من المحرك — بنود مفلترة متطلعش رصيد هجين */
+    const full=claimCalc().bal;
+    ROWS+=`<tr class="tot"><td colspan="6">إجمالي البنود المعروضة (${CLM.st==="ok"?"المعتمد فقط":"قيد المراجعة فقط"})</td><td class="n">${fmt(R.reduce((a,r)=>a+r.usd,0))}</td></tr>`;
+    ROWS+=`<tr class="net"><td colspan="6">رصيد المطالبة الكامل (كل البنود)</td><td class="n ${full>=0?"p":"m"}">${fmt(full)} $</td></tr>`;
+  }
   if(CLM.sal&&SAL.amt>0){const sc=salCalc();
     ROWS+=`<tr class="sec"><td colspan="7">مستحقات الراتب والحوافز — منفصلة عن المطالبة</td></tr>`;
     ROWS+=`<tr><td class="c">—</td><td class="c"></td><td>المستحق حتى الآن (${sc.n} شهر)</td><td class="c"></td><td class="c">${esc(SAL.cur)}</td><td class="c"></td><td class="n">${fmt(sc.acc)}</td></tr>`;
@@ -2193,7 +2206,7 @@ function claimPrint(){
     `<div>مُقدِّم المطالبة: <b>${esc(CFG.name||"—")}</b><br><span style="color:#8A97A4">التوقيع: ..................................</span></div>`+
     `<div style="text-align:left">استلام الشركة<br><span style="color:#8A97A4">الاسم والتوقيع: ..................................</span></div>`+
     `</div></td></tr>`;
-  prDoc("تقرير المطالبة",CFG.name||"—",new Date(),ROWS,false,R.length+" بند · جميع القيم بالدولار الأمريكي",HEAD);
+  prDoc("تقرير المطالبة",CFG.name||"—",new Date(),ROWS,false,R.length+" بند · "+clmTxt()+" · جميع القيم بالدولار الأمريكي",HEAD);
 }
 function TOTX(b,label,n,vals){const c=[[label,S.tot]];
   for(let i=1;i<n;i++)c.push(vals&&vals[i]!==undefined?[Math.round((+vals[i]||0)*100)/100,S.totm]:["",S.tot]);
@@ -2768,7 +2781,7 @@ let rptPer="y",rptD1="",rptD2="",rptCur="",rptView=(function(){try{return localS
 function rfTgl(){const el=$("rfilters"),b=$("rfbtn");if(!el)return;const on=el.classList.contains("hide");el.classList.toggle("hide",!on);b.classList.toggle("open",on);}
 function rfSum(){const el=$("rfsum");if(!el)return;
   const c=rptCur?" · "+rptCur:" · كل العملات";
-  el.textContent=(perFull()||"كل الفترات")+c;}
+  el.textContent=perLabel()+c;}
 function setRpt(p){rptPer=p;$("rcustom").classList.toggle("hide",p!=="c");$("ryearw").classList.toggle("hide",p!=="y");renderRpt();}
 function setRptDate(){rptD1=$("rd1").value;rptD2=$("rd2").value;renderRpt();}
 function setRptCur(v){rptCur=v;renderRpt();}
@@ -2777,6 +2790,10 @@ function setView(v){
   if(!RPTNM[v])v="rco";
   rptView=v;try{localStorage.setItem("bg_rview",v)}catch(e){}
   document.querySelectorAll(".vcard").forEach(c=>c.classList.toggle("hide",c.dataset.v!==v));
+  /* ملاءمة شريط التصفية للعرض: المركز لقطة يومية (بلا فترة)، والضمانات بلا تصفية أصلاً */
+  {const fp=$("rfper");if(fp)fp.classList.toggle("hide",v==="rpos");
+   const rb=$("rfbtn");if(rb)rb.classList.toggle("hide",v==="rgr");
+   if(v==="rgr"){const rf=$("rfilters");if(rf)rf.classList.add("hide");if(rb)rb.classList.remove("open");}}
   ["rco","rpos","rchart","rgr"].forEach(x=>{const b=$("rv_"+x);if(b)b.classList.toggle("on",x===v);});
   const n=$("expnote");if(n)n.textContent="كل الطباعة والتصدير من هنا.";
   const bp=$("b_print");if(bp){bp.title="طباعة "+RPTNM[v];bp.setAttribute("aria-label","طباعة "+RPTNM[v]);}
@@ -2810,14 +2827,16 @@ function kpiGo(k){ filt=k; go('log'); setTimeout(()=>{try{renderLog();
   const b=document.querySelector('#seg button[onclick*="'+k+'"]');
   if(b){document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
 }catch(e){}},250);}
-function rptFilter(){
+function perFilter(){ /* الفلترة الزمنية فقط — مستند المطالبة الدولاري بيستخدمها من غير تصفية العملة */
   const now=new Date(), mk=today().slice(0,7);
-  let L;
-  if(rptPer==="m")L=DB.filter(r=>r.date.slice(0,7)===mk);
-  else if(rptPer==="q"){const from=ymLocal(new Date(now.getFullYear(),now.getMonth()-2,1));
-    L=DB.filter(r=>r.date.slice(0,7)>=from);}
-  else if(rptPer==="c")L=DB.filter(r=>(!rptD1||r.date>=rptD1)&&(!rptD2||r.date<=rptD2));
-  else L=DB.filter(r=>rptYear==="all"||r.date.slice(0,4)===rptYear);
+  if(rptPer==="m")return DB.filter(r=>r.date.slice(0,7)===mk);
+  if(rptPer==="q"){const from=ymLocal(new Date(now.getFullYear(),now.getMonth()-2,1));
+    return DB.filter(r=>r.date.slice(0,7)>=from&&r.date.slice(0,7)<=mk);} /* سقف أعلى: قيد مؤرَّخ مستقبلاً ميدخلش */
+  if(rptPer==="c")return DB.filter(r=>(!rptD1||r.date>=rptD1)&&(!rptD2||r.date<=rptD2));
+  return DB.filter(r=>rptYear==="all"||r.date.slice(0,4)===rptYear);
+}
+function rptFilter(){
+  let L=perFilter();
   if(rptCur)L=L.filter(r=>r.cur===rptCur);
   return L;
 }
@@ -2930,15 +2949,17 @@ function printPos(){
   const c=claimCalc(), sc=salCalc();
   const A=[],L=[],NV=[];
   /* النقدية والبنوك كانت ساقطة من المركز المالي المطبوع — الصافي كان ناقص كل السيولة */
-  (PF.cash||[]).forEach(x=>{const a=+x.amt||0;(a?A:NV).push({g:"cash",n:x.name,v:a,cu:x.cur||"دولار"});});
-  (PF.as||[]).forEach(x=>{const a=+x.amt||0;(a?A:NV).push({g:"as",n:x.name,v:a,cu:x.cur||"دولار"});});
-  if(c.bal>0)A.push({g:"co",n:"مطالبة الشركة — الحساب الجاري",v:c.bal,cu:"دولار"});
-  if(c.bal<0)L.push({g:"co",n:"مستحق للشركة — الحساب الجاري",v:-c.bal,cu:"دولار"});
-  if(SAL.amt>0&&sc.bal)A.push({g:"co",n:"صافي مستحقات الراتب",v:sc.bal,cu:SAL.cur});
-  (PF.due||[]).forEach(x=>{const r=(+x.amt||0)-(+x.paid||0);if(r>0)A.push({g:"due",n:x.name,v:r,cu:x.cur||"دولار"});});
-  (PF.dbt||[]).forEach(x=>{const r=(+x.amt||0)-(+x.paid||0);if(r>0)L.push({g:"dbt",n:x.name,v:r,cu:x.cur||"دولار"});});
-  (PF.zak||[]).forEach(x=>{const a=+x.amt||0;if(a)L.push({g:"zak",n:"زكاة "+(x.year||x.name||""),v:a,cu:x.cur||"دولار"});});
-  if(c.cust)L.push({g:"cst",n:"رصيد العهدة غير المسوَّى",v:c.cust,cu:"دولار"});
+  /* نفس فلتر العملة اللي على الشاشة — المطبوع لازم يطابق المعروض */
+  const CF=x=>!rptCur||(x.cur||"دولار")===rptCur;
+  (PF.cash||[]).filter(CF).forEach(x=>{const a=+x.amt||0;(a?A:NV).push({g:"cash",n:x.name,v:a,cu:x.cur||"دولار"});});
+  (PF.as||[]).filter(CF).forEach(x=>{const a=+x.amt||0;(a?A:NV).push({g:"as",n:x.name,v:a,cu:x.cur||"دولار"});});
+  if(c.bal>0&&(!rptCur||rptCur==="دولار"))A.push({g:"co",n:"مطالبة الشركة — الحساب الجاري",v:c.bal,cu:"دولار"});
+  if(c.bal<0&&(!rptCur||rptCur==="دولار"))L.push({g:"co",n:"مستحق للشركة — الحساب الجاري",v:-c.bal,cu:"دولار"});
+  if(SAL.amt>0&&sc.bal&&(!rptCur||rptCur===SAL.cur))A.push({g:"co",n:"صافي مستحقات الراتب",v:sc.bal,cu:SAL.cur});
+  (PF.due||[]).filter(CF).forEach(x=>{const r=(+x.amt||0)-(+x.paid||0);if(r>0)A.push({g:"due",n:x.name,v:r,cu:x.cur||"دولار"});});
+  (PF.dbt||[]).filter(CF).forEach(x=>{const r=(+x.amt||0)-(+x.paid||0);if(r>0)L.push({g:"dbt",n:x.name,v:r,cu:x.cur||"دولار"});});
+  (PF.zak||[]).filter(CF).forEach(x=>{const a=+x.amt||0;if(a)L.push({g:"zak",n:"زكاة "+(x.year||x.name||""),v:a,cu:x.cur||"دولار"});});
+  if(c.cust&&(!rptCur||rptCur==="دولار"))L.push({g:"cst",n:"رصيد العهدة غير المسوَّى",v:c.cust,cu:"دولار"});
   const NAMES={cash:"النقدية والبنوك",as:"الممتلكات والأصول",co:"مستحقاتك لدى الشركة",due:"مستحقات لك عند أشخاص",dbt:"ديون عليك",zak:"الزكاة المستحقة",cst:"رصيد العهدة غير المسوَّى"};
   const sec=(title,list)=>{
     if(!list.length)return "";
@@ -2969,7 +2990,7 @@ function printPos(){
   if(NV.length){rows+=`<tr class="sec"><td colspan="3">أصول بلا تقييم (غير محتسبة)</td></tr><tr class="grp"><td>أصول بلا تقييم</td><td class="c">—</td><td class="n">${NV.length} بند</td></tr>`;
     if(POSOPEN["nv_دولار"])rows+=NV.map(x=>`<tr class="it"><td>${esc(x.n)}</td><td class="c">—</td><td class="n">—</td></tr>`).join("");}
   rows+=sec("الالتزامات",L)+net;
-  prDoc("المركز المالي",who,d,rows,ONE,"الأرصدة كما هي اليوم");
+  prDoc("المركز المالي",who,d,rows,ONE,"الأرصدة كما هي اليوم"+(rptCur?" — معروض: "+rptCur+" فقط":""));
 }
 function perLabel(){
   if(rptPer==="m"){const d=new Date();return MON[d.getMonth()]+" "+d.getFullYear();}
@@ -2978,13 +2999,13 @@ function perLabel(){
   return rptYear==="all"?"كل الفترات":"سنة "+rptYear;
 }
 function perFull(){return perLabel()+(rptCur?" · "+rptCur:"");}
-function coData(){
+function coData(full){
   const c=claimCalc(), sc=salCalc();
   const S={};   /* مصروفات مدفوعة من ماله عن الشركة */
   const P={};   /* المسدَّد من الشركة */
   const CR={};  /* عُهد مستلمة */
   const CS={};  /* مصروف من العهدة */
-  rptFilter().forEach(r=>{
+  (full?[...DB]:rptFilter()).forEach(r=>{
     if(r.k==="co"){
       if(r.ref&&r.src!=="cust"){   /* ردّ مصروف من الشركة يُعرض ضمن «المسدَّد والمستردّ» — مطابقة لمحرك المطالبة */
         const kr="REF|"+r.cur;P[kr]=P[kr]||{n:"ردّ مصروفات من الشركة",cu:r.cur,v:0,c:0};P[kr].v+=r.amt;P[kr].c++;
@@ -3016,13 +3037,13 @@ function printCo(){
       if(COOPEN[key+"_"+cu.replace(/\s/g,"")])L2.sort((a,b)=>b.v-a.v).forEach(x=>{r+=line(x.n,x.v,x.cu,"it");});
       return r;}).join("");
   };
-  let rows=secT("الحساب الجاري");
+  let rows=secT("الحساب الجاري (تراكمي منذ البداية)");
   rows+=line("الرصيد الافتتاحي ("+OPEN.date+")",c.open,"دولار");
   rows+=line("مصروفات مسجَّلة عبر التطبيق",c.sp,"دولار");
   rows+=line("المسدَّد من الشركة",c.pay,"دولار");
   rows+=`<tr class="net"><td>رصيد المطالبة</td><td class="c">دولار</td><td class="n num ${c.bal>=0?"p":"m"}">${fmt(c.bal)}</td></tr>`;
   if(SAL.amt>0){
-    rows+=secT("مستحقات الراتب");
+    rows+=secT("مستحقات الراتب (تراكمي منذ البداية)");
     rows+=line("المستحق حتى الآن ("+sc.n+" شهر)",sc.acc,SAL.cur);
     if(sc.ext)rows+=line("حوافز ومستحقات إضافية",sc.ext,SAL.cur);
     rows+=line("المقبوض",sc.rec,SAL.cur);
@@ -3032,9 +3053,7 @@ function printCo(){
   if(D.P.length){rows+=secT("المسدَّد من الشركة")+blk("p","مقبوضات",D.P);}
   if(D.CR.length||D.CS.length){rows+=secT("العُهد")+blk("cr","عُهد مستلمة",D.CR)+blk("cs","مصروف من العهدة",D.CS)
     +`<tr class="net"><td>رصيد العهدة غير المسوَّى</td><td class="c">دولار</td><td class="n num ${c.cust>0?"m":"p"}">${fmt(c.cust)}</td></tr>`;}
-  const G=(PF.gr||[]).map(x=>({n:x.name,cu:x.cur||"دولار",v:+x.amt||0}));
-  if(G.length){rows+=secT("الضمانات — دين على الشركة بضمانه الأدبي (غير محتسب)")+blk("g","ضمانات",G);}
-  prDoc("تقرير الشركة",who,d,rows,ONE,perFull());
+  prDoc("تقرير الشركة",who,d,rows,ONE,"التفاصيل حسب التصفية: "+perFull());
 }
 function renderCo(){
   const D=coData(), c=D.c, sc=D.sc;
@@ -3052,8 +3071,8 @@ function renderCo(){
         <div class="gb">${L2.sort((a,b)=>b.v-a.v).map(x=>`<div class="kv"><span>${esc(x.n)} <span class="mini">${x.c} عملية</span></span><b class="num">${fmt(x.v)} ${CSY[x.cu]||x.cu}</b></div>`).join("")}</div></div>`;
     }).join("");
   };
-  let h=`<div class="kv" style="border-bottom:0;padding-top:0"><span class="mini">الفترة: ${esc(perFull())}</span><span></span></div>`;
-  h+=`<div class="hsec co" style="margin-top:2px">أولاً: الحساب الجاري</div>`;
+  let h=`<div class="kv" style="border-bottom:0;padding-top:0"><span class="mini">تصفية التفاصيل: ${esc(perFull())}</span><span></span></div>`;
+  h+=`<div class="hsec co" style="margin-top:2px">أولاً: الحساب الجاري <span class="mini">تراكمي منذ البداية</span></div>`;
   h+=`<div class="kv"><span>الرصيد الافتتاحي <span class="mini">${OPEN.date}</span></span><b class="num">${fmt(c.open)} $</b></div>`;
   h+=`<div class="kv"><span>مصروفات مسجَّلة عبر التطبيق</span><b class="num">${fmt(c.sp)} $</b></div>`;
   h+=`<div class="kv"><span>المسدَّد من الشركة</span><b class="num">${fmt(c.pay)} $</b></div>`;
@@ -3061,7 +3080,7 @@ function renderCo(){
     ?`<div class="nrow pos"><span>رصيد المطالبة<span class="mini">بالدولار</span></span><b class="num">${fmt(c.bal)} $</b></div>`
     :`<div class="nrow neg"><span>مستحق للشركة (عليه)<span class="mini">بالدولار — الرصيد سالب</span></span><b class="num">${fmt(-c.bal)} $</b></div>`;
   if(SAL.amt>0){
-    h+=`<div class="hsec co" style="margin-top:14px">ثانياً: الراتب والحوافز</div>`;
+    h+=`<div class="hsec co" style="margin-top:14px">ثانياً: الراتب والحوافز <span class="mini">تراكمي منذ البداية</span></div>`;
     h+=`<div class="kv"><span>المستحق حتى الآن <span class="mini">${sc.n} شهر</span></span><b class="num">${fmt(sc.acc)} ${CSY[SAL.cur]||""}</b></div>`;
     if(sc.ext)h+=`<div class="kv"><span>حوافز ومستحقات إضافية</span><b class="num">${fmt(sc.ext)} ${CSY[SAL.cur]||""}</b></div>`;
     h+=`<div class="kv"><span>المقبوض</span><b class="num">${fmt(sc.rec)} ${CSY[SAL.cur]||""}</b></div>`;
@@ -3252,13 +3271,16 @@ function renderRpt(){
   
   /* الرسم الشهري — آخر ٦ شهور بالعملة الرئيسية */
   const mons=[];{const b=new Date();for(let i=5;i>=0;i--){mons.push(ymLocal(new Date(b.getFullYear(),b.getMonth()-i,1)));}}
-  const mData=mons.map(mk=>{const L=DB.filter(r=>r.date.slice(0,7)===mk&&r.cur===mainCur);
+  /* عملة الرسم من حركة الستة شهور نفسها — مش من الفترة المفلترة (كانت بتقلب الرسم فاضي) */
+  const cc6={};DB.forEach(r=>{if(mons.includes(r.date.slice(0,7)))cc6[r.cur]=(cc6[r.cur]||0)+1;});
+  const chartCur=rptCur||Object.keys(cc6).sort((a,b)=>cc6[b]-cc6[a])[0]||mainCur;
+  const mData=mons.map(mk=>{const L=DB.filter(r=>r.date.slice(0,7)===mk&&r.cur===chartCur);
     return {mk,i:L.filter(r=>r.k==="in").reduce((a,r)=>a+r.amt,0),
             c:L.filter(r=>r.k==="co").reduce((a,r)=>a+(r.ref?-r.amt:r.amt),0),
             o:L.filter(r=>r.k==="out").reduce((a,r)=>a+r.amt,0)};});
   const mMax=Math.max(...mData.map(x=>Math.max(x.i,x.c,x.o)),1);
-  $("rchartcur").textContent="آخر ٦ شهور — "+mainCur;
-  $("rchart").innerHTML=KPIH+(mData.some(x=>x.i||x.c||x.o)?
+  $("rchartcur").textContent="آخر ٦ شهور — "+chartCur;
+  $("rchart").innerHTML=`<div class="mini" style="margin:0 0 6px">مؤشرات الفترة: ${esc(perFull())}${rptPer==="m"?" — حتى اليوم":""}</div>`+KPIH+(mData.some(x=>x.i||x.c||x.o)?
     `<div class="mchart">`+mData.map(x=>`<div class="mcol"><div class="mbars">
       <i class="b1" style="height:${Math.max(2,Math.round(x.i/mMax*100))}px"></i>
       <i class="b2" style="height:${Math.max(2,Math.round(x.c/mMax*100))}px"></i>
