@@ -1,4 +1,4 @@
-const C='bg-accounts-v127';
+const C='bg-accounts-v128';
 const ASSETS=['./manifest.json','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html'].concat(ASSETS))).then(()=>self.skipWaiting()));});
 /* استثناء bg-fonts من المسح: كان بيتمسح مع كل تحديث نسخة فيرجع التطبيق أوفلاين من غير خط Cairo */
