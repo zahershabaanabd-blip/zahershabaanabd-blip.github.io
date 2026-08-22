@@ -65,16 +65,6 @@ header::after{content:"";position:absolute;inset:auto -60px -70px auto;width:220
 .dot.off{background:#94A3B8;box-shadow:none}
 /* ===== المحتوى ===== */
 .wrap{max-width:640px;margin:14px auto 100px;padding:0 16px;position:relative;z-index:2}
-.hero{background:var(--ink);color:#fff;border-radius:15px;padding:16px 16px 13px;margin-bottom:14px;container-type:inline-size}
-@container (max-width:340px){.hero .hval{font-size:1.4375rem}}
-.hero .hlb{font-size:0.75rem;color:rgba(220,230,240,.72);font-weight:600;display:flex;justify-content:space-between;align-items:baseline}
-.hero .hlb b{color:rgba(220,230,240,.85);font-weight:600;font-size:0.8125rem}
-.hero .hval{font-size:1.75rem;font-weight:800;color:#E8C971;letter-spacing:-.5px;margin-top:4px;line-height:1.3}
-.hero .hsub{font-size:0.8125rem;color:rgba(220,230,240,.65);margin-top:3px;line-height:1.7}
-.hero .hrow{display:flex;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12)}
-.hero .hrow>div{flex:1;min-width:0}
-.hero .hrow span{display:block;font-size:0.7812rem;color:rgba(220,230,240,.62);font-weight:600}
-.hero .hrow b{display:block;font-size:0.9688rem;font-weight:700;color:#fff;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .netline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:0.8438rem}
 .netline>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .netline b{flex:none}
@@ -127,8 +117,6 @@ header::after{content:"";position:absolute;inset:auto -60px -70px auto;width:220
 .stc b{display:block;font-size:1.05rem;font-weight:800;margin-top:4px;white-space:nowrap}
 .stc b,.kpi b{direction:ltr;unicode-bidi:isolate;text-align:right}   /* المبلغ والعملة بنفس الترتيب في كل مكان، ومحاذاة تحت العنوان */
 .stc.co b{color:var(--co)}.stc.in b{color:var(--in)}.stc.gd b{color:#8A6D14}
-.stc.mng{background:var(--ink);border-color:var(--ink)}
-.stc.mng span{color:#C7D2DE}.stc.mng b{color:#fff;font-size:0.92rem;display:flex;align-items:center;gap:6px}
 .kd{display:block;font-style:normal;font-size:0.75rem;font-weight:700;margin-top:2px}
 .kd.up{color:var(--in)}.kd.dn{color:var(--out)}
 .mchart{display:flex;align-items:flex-end;gap:6px;height:130px;padding:8px 2px 0}
@@ -140,8 +128,6 @@ header::after{content:"";position:absolute;inset:auto -60px -70px auto;width:220
 .leg{display:flex;gap:14px;justify-content:center;padding:4px 0 2px;font-size:0.7812rem;color:var(--mut);font-weight:700}
 .leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-left:5px;vertical-align:-1px}
 .netline b{font-weight:700}
-.hero .lbl{font-size:0.7812rem;color:var(--mut);display:flex;justify-content:space-between;align-items:center}
-.hero .lbl b{color:var(--ink);font-size:0.8125rem}
 .stat{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
 .stat::-webkit-scrollbar{display:none}
 .st{min-width:148px;flex:1;border-radius:15px;padding:13px 14px;border:1px solid var(--line);background:#FBFCFD}
@@ -241,13 +227,9 @@ nav .nadd:active .naddc{transform:scale(.93)}
 .sheet p{margin:0 0 18px;color:var(--mut);font-size:0.875rem}
 .hide{display:none}
 @media print{
-  nav,#toast,#modal,#addsheet,#recsheet,#lock,.noprint,header{display:none !important}
+  nav,#toast,#modal,#recsheet,#lock,.noprint,header{display:none !important}
   .wrap{margin:0;padding:0;max-width:100%}
   .card,.mod,.gitem{border-color:#C9D3DC !important;box-shadow:none !important;break-inside:avoid}
-  .hero,.hc.acc{background:#fff !important;color:#1B2A3A !important;border:1px solid #1B2A3A !important}
-  .hero .hval{color:#1B2A3A !important}
-  .hero .hlb,.hero .hsub,.hero .hrow span{color:#5B6B7C !important}
-  .hero .hrow b,.hc.acc .vl{color:#1B2A3A !important}
   .hc.acc .lb,.hc.acc .sb{color:#5B6B7C !important}
   .nrow{background:#fff !important;border:1.5px solid #1B2A3A !important}
   .nrow.pos>b{color:#0F7B4F !important} .nrow.neg>b{color:#B3323C !important}
@@ -256,20 +238,11 @@ nav .nadd:active .naddc{transform:scale(.93)}
   .mod .mh{background:#F4F7FA !important;color:#1B5C5E !important}
   .banner{background:#F4F7FA !important;color:#1B5C5E !important}
 }
-#addsheet,.ovl{position:fixed;inset:0;background:rgba(14,36,56,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:60;display:none;
+.ovl{position:fixed;inset:0;background:rgba(14,36,56,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:60;display:none;
   align-items:flex-end;justify-content:center}
-#addsheet.show,.ovl.show{display:flex}
+.ovl.show{display:flex}
 .grab{display:block;width:44px;height:5px;border-radius:3px;background:#E2E7EE;margin:-4px auto 14px}
-.addgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 6px}
-.addc{border:1px solid var(--line);background:#fff;border-radius:17px;padding:16px 6px 13px;font-family:inherit;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;transition:transform .12s,border-color .15s,background .15s}
-.addc:active{transform:scale(.95);background:#FBFCFD}
-.addc .ico{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;flex:none}
-.addc.in .ico{background:var(--inb);color:var(--in)}
-.addc.co .ico{background:var(--cob);color:var(--co)}
-.addc.out .ico{background:var(--outb);color:var(--out)}
-.addc b{font-size:0.8438rem;font-weight:800;color:var(--ink);line-height:1.45}
-.addc>span:last-child{font-size:0.7812rem;color:var(--mut);line-height:1.5;font-weight:700}
 .ghost{width:100%;border:0;background:none;color:var(--mut);font-family:inherit;font-size:0.9375rem;font-weight:700;padding:13px;cursor:pointer;margin-top:6px}
 #lock{position:fixed;inset:0;z-index:200;background:var(--ink);
   display:none;align-items:center;justify-content:center;padding:24px}
@@ -300,7 +273,6 @@ nav .nadd:active .naddc{transform:scale(.93)}
   font-size:0.875rem;font-weight:700;cursor:pointer;padding:10px;width:100%}
 .lkalt.hide{display:none}
 .lnk{color:var(--co);font-weight:700;cursor:pointer;margin-right:8px;font-size:0.8125rem;white-space:nowrap}
-.brbox{background:#F7F9FB;border:1px solid var(--line);border-radius:13px;padding:6px 12px;margin:2px 0 8px}
 .bri{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:0.7812rem}
 .bri:last-child{border:0}
 .bri .brn{min-width:0;line-height:1.6;font-weight:700;color:var(--txt)}
@@ -583,21 +555,7 @@ section{animation:fade .25s ease}
 
 <div class="wrap">
 <!-- ========== الرئيسية ========== -->
-<section id="home">
-  <div id="hbk" class="bkw warn hide" style="margin-bottom:12px"></div>
-  <div id="firstrun" class="card hide" style="border:1.5px dashed var(--gold);background:#FFFDF5">
-    <div class="ch"><h3>استيراد البيانات</h3></div>
-    <p class="note">استورد ملف البيانات المُرسَل من المحاسب لعرض أرصدتك وممتلكاتك.</p>
-    <button class="btn p" style="margin-top:8px" onclick="go('exp')">استيراد ملف البيانات</button>
-  </div>
-  <div class="hero" id="hero"></div>
-  <div id="dash"></div>
 
-  <div class="card">
-    <div class="ch"><h3>آخر العمليات</h3><a onclick="go('log')">عرض الكل</a></div>
-    <div id="recent"></div>
-  </div>
-</section>
 
 <!-- ========== النموذج ========== -->
 <section id="reg" class="hide">
@@ -1537,7 +1495,7 @@ let DB=JSON.parse(localStorage.getItem("bg_recs")||"[]");
 let CFG=JSON.parse(localStorage.getItem("bg_cfg")||"{}");
 if(PRESET_URL&&!CFG.url){CFG.url=PRESET_URL;localStorage.setItem("bg_cfg",JSON.stringify(CFG));}
 let kind="in",img=null,cat="",sub="",filt="all",rptYear="all",lsort="d";
-const APPVER="12.59";
+const APPVER="13.00";
 /* آيفون/آيباد/سفاري — سلوك الطباعة والتنزيل مختلف ولازم مسار خاص */
 const IOSLIKE=(function(){try{
   const ua=navigator.userAgent||"";
@@ -2509,7 +2467,6 @@ function catLine(){
   if(!cat){el.innerHTML="";return;}
   el.innerHTML=`<span>التصنيف: <b>${esc(catName(cat))}${sub?" › "+esc(sub):""}</b></span>`;
 }
-function editCat(){toggleMore(true);setTimeout(()=>$("catchips").scrollIntoView({behavior:"smooth",block:"center"}),80);}
 function autoCat(txt){
   if(catManual)return;
   const s2=suggest(txt,kind);
@@ -2706,61 +2663,6 @@ function rowBody(r){
     </span></div>`;
 }
 function empty(t,s){return `<div class="empty"><div class="e"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15h6"/></svg></div><b>${t}</b><span>${s}</span></div>`;}
-function renderHome(){
-  const d=new Date();
-  $("uname").textContent=CFG.name||"سجل شخصي";
-  const mKey=today().slice(0,7);
-  const mCount=DB.filter(r=>r.date.slice(0,7)===mKey).length;
-  const pend=pendCount();
-  try{
-    const c=claimCalc(), sc=salCalc();
-    /* الهيرو: موقفك المالي اليوم */
-    const totCo=Math.round((c.bal+((SAL.amt>0&&SAL.cur==="دولار")?sc.bal:0))*100)/100;
-    $("hero").innerHTML=
-      `<div class="hlb"><span>إجمالي مستحقاتك لدى الشركة</span><b>${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</b></div>`+
-      `<div class="hval num">${fmt(totCo)} $</div>`+
-      `<div class="hsub">بالدولار — ${SAL.amt>0?(SAL.cur==="دولار"?`مطالبة <span class="num">${fmt(c.bal)}</span> + راتب <span class="num">${fmt(sc.bal)}</span>`:`مطالبة <span class="num">${fmt(c.bal)}</span> (الراتب بعملة أخرى غير مُدرج)`):`رصيد المطالبة المعتمد — الراتب لم يُضبط بعد`}</div>`+
-      `<div class="hrow">
-        <div><span>عمليات ${MON[d.getMonth()]}</span><b class="num">${mCount}</b></div>
-        <div><span>بانتظار الإرسال</span><b class="num">${pend}</b></div>
-        <div><span>عهد لم تُسوَّ</span><b class="num">${c.cust?fmt(c.cust)+" $":"لا يوجد"}</b></div>
-      </div>`;
-    /* ٣ كروت مختصرة — التفاصيل في صفحاتها */
-    const sum=(L)=>{const t={};(L||[]).forEach(x=>{const a=+x.amt||0;if(!a)return;t[x.cur]=(t[x.cur]||0)+(a-(+x.paid||0));});return t;};
-    const tD=sum(PF.dbt), tU=sum(PF.due);
-    const tA={};(PF.as||[]).forEach(x=>{const a=+x.amt||0;if(a)tA[x.cur]=(tA[x.cur]||0)+a;});
-    const PL={},MN={};
-    const acc2=(o,k2,v)=>{if(v)o[k2]=Math.round(((o[k2]||0)+v)*100)/100;};
-    Object.entries(tA).forEach(([k2,v])=>acc2(PL,k2,v));
-    Object.entries(tU).forEach(([k2,v])=>acc2(PL,k2,v));
-    acc2(PL,"دولار",c.bal);
-    if(SAL.amt>0)acc2(PL,SAL.cur,sc.bal);
-    Object.entries(tD).forEach(([k2,v])=>acc2(MN,k2,v));
-    (PF.zak||[]).forEach(x=>{const a=+x.amt||0;if(a)acc2(MN,x.cur||"دولار",a);});
-    acc2(MN,"دولار",c.cust);
-    const curs=[...new Set([...Object.keys(PL),...Object.keys(MN)])];
-    const net=curs.map(cu=>({cu,v:Math.round(((PL[cu]||0)-(MN[cu]||0))*100)/100}));
-    const mainNet=net.sort((a,b)=>Math.abs(b.v)-Math.abs(a.v))[0];
-    let h=`<div class="hgrid">
-      <div class="hc" onclick="go('co2')" style="cursor:pointer"><div class="lb">مطالبة الشركة</div>
-        <div class="vl num co">${fmt(c.bal)} $</div><div class="sb">اضغط للتفاصيل</div></div>
-      <div class="hc" onclick="go('rpt')" style="cursor:pointer"><div class="lb">صافي المركز المالي</div>
-        ${mainNet?`<div class="vl num ${mainNet.v>=0?"in":"out"}">${fmt(mainNet.v)} ${CSY[mainNet.cu]||""}</div><div class="sb">${net.length>1?"و"+(net.length-1)+" عملات أخرى — في التقارير":"لكل عملة على حدة"}</div>`:`<div class="vl vn">—</div><div class="sb">أضف بياناتك</div>`}
-      </div>
-    </div>`;
-    $("dash").innerHTML=h;
-  }catch(e){ $("dash").innerHTML=""; }
-  {let lb=null;try{lb=localStorage.getItem("bg_lastbk");}catch(e){}
-   const nd=daysSince(lb), hasData=DB.length||["cash","as","dbt","due","gr","zak"].some(t=>(PF[t]||[]).length);
-   const hb=$("hbk");
-   if(hb){const due=hasData&&(nd===null||nd>=30);
-     hb.classList.toggle("hide",!due);
-     if(due)hb.innerHTML=`<span>${nd===null?"لم تُحفظ نسخة احتياطية بعد":"آخر نسخة احتياطية من "+nd+" يوماً"}</span><button onclick="go('exp')">حفظ نسخة</button>`;}}
-  const fresh=!DB.length&&!CFG.url&&!["cash","as","dbt","due","gr","zak"].some(t=>(PF[t]||[]).length);
-  $("firstrun").classList.toggle("hide",!fresh);
-  const last=[...DB].sort((a,b)=>b.id-a.id).slice(0,3);
-  $("recent").innerHTML=last.length?last.map(r=>row(r,0)).join(""):empty("لا توجد عمليات بعد","سيظهر هنا آخر ما تسجّله");
-}
 function setSort(v){lsort=v;renderLog();}
 function setF(f,el){filt=f;el.parentNode.querySelectorAll("button").forEach(b=>b.classList.remove("on"));el.classList.add("on");renderLog();}
 function stOpen(v){rptView=v;try{localStorage.setItem("bg_rview",v)}catch(e){}go("rpt");}
@@ -3305,22 +3207,23 @@ function renderRpt(){
     :`<div class="note">لا توجد حركة في آخر ٦ شهور</div>`;
 }
 function setYear(v){rptYear=v;renderRpt();}
-async function verifySync(){ // طبقة تأكيد ثانية فوق إيصال السيرفر — نقارن بالشيت فعلياً
-  if(!CFG.url)return;
+async function verifySync(ids){ // طبقة تأكيد ثانية فوق إيصال السيرفر — نتحقق من اللي اتبعت حالاً فقط
+  if(!CFG.url||!ids||!ids.length)return;  /* التحديد ضروري: الفحص الشامل كان يرجّع عمليات محذوفة من جهاز تاني */
   try{
-    const r=await fetchT(CFG.url+"?action=list&key="+encodeURIComponent(CFG.key||"",null,15000)+"&t="+Date.now());
+    const r=await fetchT(CFG.url+"?action=list&key="+encodeURIComponent(CFG.key||"")+"&t="+Date.now(),null,15000);
     const j=await r.json(); if(!j||!Array.isArray(j.rows))return;
     const there=new Set(j.rows.map(x=>String(x.id)));
+    const sent=new Set(ids.map(String));
     let back=0;
-    DB.forEach(x=>{ if(x.sy&&!there.has(String(x.id))){x.sy=0;back++;} });
+    DB.forEach(x=>{ if(sent.has(String(x.id))&&x.sy&&!there.has(String(x.id))){x.sy=0;back++;} });
     if(back){save();syncBar();toast(back+" عملية ما وصلتش — هتتبعت تاني",1);}
   }catch(e){}
 }
-async function cloudRestore(){
-  if(!CFG.url){toast("لا يوجد رابط مزامنة",1);return;}
-  toast("جارٍ الجلب من السجل السحابي…");
+async function cloudRestore(auto){
+  if(!CFG.url){if(!auto)toast("لا يوجد رابط مزامنة",1);return;}
+  if(!auto)toast("جارٍ الجلب من السجل السحابي…");
   try{
-    const r=await fetchT(CFG.url+"?action=list&key="+encodeURIComponent(CFG.key||"",null,15000)+"&t="+Date.now());
+    const r=await fetchT(CFG.url+"?action=list&key="+encodeURIComponent(CFG.key||"")+"&t="+Date.now(),null,15000);
     const j=await r.json();
     if(!j||!Array.isArray(j.rows))throw 0;
     const byId=new Map(DB.map(x=>[String(x.id),x]));
@@ -3348,9 +3251,19 @@ async function cloudRestore(){
         cur:x.cur||"دولار",who:x.from||"",cat:x.code||"",sub:x.sub||"",des:des,img:"",src:isCust?"cust":"",
         fx:Number(x.fx)||"",usd:x.usd===""?"":Number(x.usd),ref:x.ref?1:0,sy:1});
       added++;});
+    /* حذف متبادل بين الأجهزة: المتزامن (sy=1) الغايب من الشيت في سحبتين متتاليتين = اتحذف من جهاز تاني → سلة المحذوفات */
+    let gone=0;
+    {const there2=new Set(j.rows.map(x=>String(x.id)));
+     const pendOp=new Set(OUT.filter(o=>o.e==="rec"&&o.item).map(o=>String(o.item.id)));
+     const rm=[];
+     DB.forEach(rr=>{const mk="r"+rr.id;
+       if(!rr.sy||there2.has(String(rr.id))||pendOp.has(String(rr.id))){delete MISS[mk];return;}
+       if(MISS[mk]){rm.push(rr);delete MISS[mk];} else MISS[mk]=1;});
+     rm.forEach(rr=>{toTrash("rec",rr,catName(rr.cat)+(rr.sub?" › "+rr.sub:"")+" — "+fmt(rr.amt)+" "+(CSY[rr.cur]||rr.cur));
+       DB=DB.filter(x=>x.id!==rr.id);gone++;});}
     save();syncBar();
     try{
-      const r2=await fetchT(CFG.url+"?action=pf&key="+encodeURIComponent(CFG.key||"",null,15000)+"&t="+Date.now());
+      const r2=await fetchT(CFG.url+"?action=pf&key="+encodeURIComponent(CFG.key||"")+"&t="+Date.now(),null,15000);
       const j2=await r2.json();
       if(j2&&j2.pf){
         ["cash","as","dbt","due","gr","zak"].forEach(t=>{
@@ -3377,18 +3290,48 @@ async function cloudRestore(){
         savePF();saveSAL();
       }
     }catch(e2){}
+    if(auto){ if((added||upd||gone)&&!uiBusy())liveRefresh(); return; }
     go("home");
-    renderHome();
-    toast(added||upd?("جديد "+added+" · محدَّث "+upd):"لا يوجد جديد من المحاسب");
-  }catch(e){toast("تعذّر الجلب — تأكد من الرابط والإنترنت",1);}
+    toast(added||upd||gone?("جديد "+added+" · محدَّث "+upd+(gone?" · اتشال "+gone:"")):"لا يوجد جديد من المحاسب");
+  }catch(e){if(!auto)toast("تعذّر الجلب — تأكد من الرابط والإنترنت",1);}
 }
-function makeClientCopy(){
-  if(!CFG.url){toast("أدخل رابط المزامنة أولاً",1);return;}
-  let h=document.documentElement.outerHTML;
-  h=h.replace(/const PRESET_URL="[^"]*";/,'const PRESET_URL="'+CFG.url+'";');
-  dl(new Blob(["<!DOCTYPE html>\n"+h],{type:"text/html;charset=utf-8"}),"سجل حساباتي.html");
-  toast("جاهز — أرسل الملف للعميل");
+/* ===== مزامنة لحظية بين الأجهزة =====
+   نفس البيانات على الموبايل واللاب: الدفع لحظي أصلاً عبر queueOp/syncNow،
+   والسحب هنا تلقائي كل دقيقة وعند فتح التطبيق أو الرجوع له أو عودة النت. */
+let PULLING=false,LASTPULL=0;const MISS={};
+function uiBusy(){ /* بلاش ريفرش والمستخدم بيكتب أو فاتح نافذة */
+  try{
+    if($("modal").classList.contains("show"))return true;
+    const rs=$("recsheet");if(rs&&rs.classList.contains("show"))return true;
+    const a=document.activeElement;
+    if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")&&a.value)return true;
+  }catch(e){}
+  return false;
 }
+function liveRefresh(){ /* إعادة رسم الشاشة الحالية بعد وصول بيانات جديدة */
+  try{
+    const s=NAV[NAV.length-1]||"reg";
+    if(s==="rpt")renderRpt();
+    else if(s==="log"||s==="reg")renderLog();
+    else if(s==="trash")renderTrash();
+    else if(s==="acc")accTab(ACCTAB);
+    else if(s==="acct"){try{renderAcct();}catch(e){}}
+    syncBar();
+  }catch(e){}
+}
+async function autoPull(force){
+  if(!CFG.url||PULLING)return;
+  if(document.hidden&&!force)return;
+  if(!force&&Date.now()-LASTPULL<20000)return;
+  if(!navigator.onLine)return;
+  PULLING=true;
+  try{LASTPULL=Date.now();await syncNow(false);await cloudRestore(1);}catch(e){}
+  PULLING=false;
+}
+setInterval(()=>autoPull(false),60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)autoPull(false);});
+window.addEventListener("online",()=>autoPull(true));
+if(CFG.url)setTimeout(()=>autoPull(true),2500);
 async function encJSON(obj,pw){
   const enc=new TextEncoder();
   const salt=crypto.getRandomValues(new Uint8Array(16));
@@ -3539,7 +3482,7 @@ async function syncNow(alertMe){
   if(!CFG.url){if(alertMe)toast("أدخل رابط المزامنة أولاً",1);return;}
   const pend=DB.filter(r=>!r.sy);
   if(!pend.length&&!OUT.length){if(alertMe)toast("كل العمليات مُرسَلة");syncBar();return;}
-  let done=0;
+  let done=0;const SENT=[];
   for(const r of pend){
     try{
       const body=JSON.stringify({key:CFG.key||"",who:CFG.name||"المستخدم",rec:{id:r.id,kind:r.k,k:label(r.k),date:r.date,amt:r.amt,cur:r.cur,
@@ -3547,7 +3490,7 @@ async function syncNow(alertMe){
       const rs=await fetchT(CFG.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body,redirect:"follow"},20000);
       let ok=false;try{const j=await rs.json();ok=!!(j&&j.ok);}catch(_){ok=rs.ok;}
       if(!ok)break;
-      r.sy=1;if(r.img){r.img="";r.imgf=1;}done++;
+      r.sy=1;if(r.img){r.img="";r.imgf=1;}done++;SENT.push(r.id);
     }catch(e){break;}
   }
   while(OUT.length){
@@ -3559,8 +3502,7 @@ async function syncNow(alertMe){
     }catch(e){break;}
   }
   save();syncBar();showSet();
-  if(done)verifySync();
-  if(!$("home").classList.contains("hide"))renderHome();
+  if(SENT.length)verifySync(SENT);
   if(!$("log").classList.contains("hide"))renderLog();
   if(alertMe)toast(done?("تم إرسال "+done+" عملية"):"تعذّر الإرسال — تحقق من الإنترنت",done?0:1);
 }
@@ -3606,8 +3548,6 @@ function regKind(k){
   REGMODE=true;
   openForm(k);
 }
-function openAdd(){go('reg');}
-function closeAdd(){}
 
 /* ===== قفل التطبيق ===== */
 let LK={buf:"",mode:"open",tmp:""};
@@ -3711,22 +3651,9 @@ document.addEventListener("visibilitychange",()=>{
   if(document.hidden)HID=Date.now();
   else if(HID && Date.now()-HID>120000 && pinCfg() && !$("lock").classList.contains("show")) lockOnStart();
 });
-function brHTML(){
-  const L=OPEN.br||[]; if(!L.length)return "";
-  const t=L.reduce((a,x)=>a+(+x.amt||0),0);
-  const diff=Math.round((t-OPEN.claim)*100)/100;
-  return L.map(x=>{const has=(x.lines||[]).length;
-    return `<div class="bri${has?" lnk":""}"${has?` onclick="acctOpen('br',${x.id})"`:""}>`+
-      `<div class="brn">${esc(x.name)}<span class="brs ${x.st==="معتمد"?"ok":"wt"}">${esc(x.st)}</span>`+
-      `${x.note?`<i>${esc(x.note)}</i>`:""}${has?`<i style="color:var(--co)">${has} عملية — اضغط للتفاصيل ✎</i>`:""}</div>`+
-      `<b class="num">${fmt(x.amt)} $</b></div>`;}).join("")
-   +`<div class="bri tt"><div class="brn">إجمالي المكوّنات</div><b class="num">${fmt(t)} $</b></div>`
-   +(Math.abs(diff)>0.009?`<p class="note" style="color:var(--out);margin-top:6px">فرق ${fmt(diff)} $ بين مجموع المكوّنات والرصيد المسجَّل.</p>`:"");
-}
-function toggleBr(){const b=$("brbox");if(b)b.classList.toggle("hide");}
 applyFS();lockOnStart();
 $("recsheet").addEventListener("click",e=>{if(e.target.id==="recsheet")closeRec();});
-syncBar();renderHome();if(CFG.url)syncNow(false);
+syncBar();if(CFG.url)syncNow(false);
 try{const last=localStorage.getItem("bg_scr");
   if(last&&last.indexOf("acct:")===0){const q=last.split(":");
     const it=(q[1]==="br"?(OPEN.br||[]):(PF[q[1]]||[])).find(v=>String(v.id)===q[2]);
